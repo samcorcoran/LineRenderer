@@ -30,14 +30,13 @@ def createPoints():
     pointCols = [255, 0, 0] * len(points)
     points_vertex_list = batch.add(len(points), pyglet.gl.GL_POINTS, None,
         ('v2i/static', list(chain.from_iterable(points))),
-        ('c3B', pointCols)
+        ('c3B/static', pointCols)
     )
     lineSegmentCols = [255, 255, 0] * (len(points))
     line_segments_vertex_list = batch.add(len(points), pyglet.gl.GL_LINE_LOOP, None,
         ('v2i/static', list(chain.from_iterable(points))),
-        ('c3B', lineSegmentCols)
+        ('c3B/static', lineSegmentCols)
     )
-
 
     # Calculate line segment normals
     lineVecs = list()
