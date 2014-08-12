@@ -2,6 +2,7 @@ import pyglet
 import random
 import math
 from itertools import chain
+
 batch = pyglet.graphics.Batch()
 
 xMax = 600
@@ -25,16 +26,18 @@ def normalize(vec):
 def createPoints():
     # Manual points
     points.extend([(100, 400), (200, 500), (300, 400), (500, 400), (500, 200), (400, 200), (100, 400)])
-    print("start, up to right, back down to right, along horizontally, 90 turn down, 90 turn again, diagonally up to start")
     printPoints("Initial points", points)
-    testList = list(chain.from_iterable(points))
-    print(testList)
-    cols = [255, 0, 0] * len(points)
-    print(cols)
+    pointCols = [255, 0, 0] * len(points)
     points_vertex_list = batch.add(len(points), pyglet.gl.GL_POINTS, None,
         ('v2i/static', list(chain.from_iterable(points))),
-        ('c3B', cols)
+        ('c3B', pointCols)
     )
+    lineSegmentCols = [255, 255, 0] * (len(points))
+    line_segments_vertex_list = batch.add(len(points), pyglet.gl.GL_LINE_LOOP, None,
+        ('v2i/static', list(chain.from_iterable(points))),
+        ('c3B', lineSegmentCols)
+    )
+
 
     # Calculate line segment normals
     lineVecs = list()
