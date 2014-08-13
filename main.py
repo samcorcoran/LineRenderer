@@ -23,18 +23,26 @@ def normalize(vec):
     magnitude = math.sqrt(vec[0]**2 + vec[1]**2)
     return (vec[0]/magnitude, vec[1]/magnitude)
 
+def drawVector(start, vector):
+    v = normalize(vector)
+    drawnLength = 20
+    batch.add(2, pyglet.gl.GL_LINES, None,
+        ('v2f/static', [start[0], start[1], start[0]+v[0]*drawnLength, start[1]+v[1]*drawnLength]),
+        ('c3B/static', (255,255,255,255,255,255))
+    )
+
 def createPoints():
     # Manual points
     points.extend([(100, 400), (200, 500), (300, 400), (500, 400), (500, 200), (400, 200), (100, 400)])
     printPoints("Initial points", points)
     pointCols = [255, 0, 0] * len(points)
     points_vertex_list = batch.add(len(points), pyglet.gl.GL_POINTS, None,
-        ('v2i/static', list(chain.from_iterable(points))),
+        ('v2f/static', list(chain.from_iterable(points))),
         ('c3B/static', pointCols)
     )
     lineSegmentCols = [255, 255, 0] * (len(points))
     line_segments_vertex_list = batch.add(len(points), pyglet.gl.GL_LINE_LOOP, None,
-        ('v2i/static', list(chain.from_iterable(points))),
+        ('v2f/static', list(chain.from_iterable(points))),
         ('c3B/static', lineSegmentCols)
     )
 
@@ -53,6 +61,12 @@ def createPoints():
         normalVec = (-vec[1], vec[0])
         unitNormalVec = normalize(normalVec)
         lineNormals.append(unitNormalVec)
+        # Visualize normal
+        midpoint = (
+            (points[pIndex][0] + points[pIndex+1][0])/2,
+            (points[pIndex][1] + points[pIndex+1][1])/2
+        )
+        drawVector(midpoint, unitNormalVec)
 
     printPoints("line vectors", lineVecs)
     printPoints("line normals", lineNormals)
@@ -76,7 +90,7 @@ def createPoints():
         #eastBorderPoints.append( (p[0]-(unitNormalVec[pIndex][0]*halfLineWidth), p[1])-(unitNormalVec[pIndex][1]*halfLineWidth) )
 
     # Calculate intersection points for east line segments (and then west)
-    #for interectionindex in range(len(intersectionNormals)):
+    #for intersectionIndex in range(len(intersectionNormals)):
 
 class GameWindow(pyglet.window.Window):
     def __init__(self, *args, **kwargs):
