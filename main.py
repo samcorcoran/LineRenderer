@@ -23,12 +23,12 @@ def normalize(vec):
     magnitude = math.sqrt(vec[0]**2 + vec[1]**2)
     return (vec[0]/magnitude, vec[1]/magnitude)
 
-def drawVector(start, vector):
+def drawVector(start, vector, col = [255,255,255]):
     v = normalize(vector)
     drawnLength = 20
     batch.add(2, pyglet.gl.GL_LINES, None,
         ('v2f/static', [start[0], start[1], start[0]+v[0]*drawnLength, start[1]+v[1]*drawnLength]),
-        ('c3B/static', (255,255,255,255,255,255))
+        ('c3B/static', col+col)
     )
 
 def createPoints():
@@ -66,7 +66,7 @@ def createPoints():
             (points[pIndex][0] + points[pIndex+1][0])/2,
             (points[pIndex][1] + points[pIndex+1][1])/2
         )
-        drawVector(midpoint, unitNormalVec)
+        drawVector(midpoint, unitNormalVec, [120,222,240])
 
     printPoints("line vectors", lineVecs)
     printPoints("line normals", lineNormals)
@@ -77,7 +77,11 @@ def createPoints():
             continue
         xComp = lineNormals[lineIndex][0] + lineNormals[lineIndex+1][0]
         yComp = lineNormals[lineIndex][1] + lineNormals[lineIndex+1][1]
-        intersectionNormals.append(normalize((xComp, yComp)))
+        intersectionNormal = normalize((xComp, yComp))
+        intersectionNormals.append(intersectionNormal)
+        # Visualize normal
+        drawVector(points[lineIndex+1], intersectionNormal, [200,250,150])
+
 
     printPoints("intersection normals", intersectionNormals)
 
