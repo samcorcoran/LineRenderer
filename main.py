@@ -89,9 +89,27 @@ def createPoints():
     westBorderPoints = list()
     eastBorderPoints = list()
     for pIndex in range(len(points)):
+        if (pIndex == len(points)-1):
+            continue
         p = points[pIndex]
-        #westBorderPoints.append( (p[0]+(unitNormalVec[pIndex][0]*halfLineWidth), p[1])+(unitNormalVec[pIndex][1]*halfLineWidth) )
-        #eastBorderPoints.append( (p[0]-(unitNormalVec[pIndex][0]*halfLineWidth), p[1])-(unitNormalVec[pIndex][1]*halfLineWidth) )
+        wX = p[0]+(lineNormals[pIndex][0]*halfLineWidth)
+        wY = p[1]+(lineNormals[pIndex][1]*halfLineWidth)
+        westBorderPoints.append( (wX, wY) )
+        westBorderPoints.append( (wX+lineVecs[pIndex][0], wY+lineVecs[pIndex][1]) )
+
+        eX = p[0]-(lineNormals[pIndex][0]*halfLineWidth)
+        eY = p[1]-(lineNormals[pIndex][1]*halfLineWidth)
+        eastBorderPoints.append( (eX, eY) )
+        eastBorderPoints.append( (eX+lineVecs[pIndex][0], eY+lineVecs[pIndex][1]) )
+    west_vertex_list = batch.add(len(westBorderPoints), pyglet.gl.GL_POINTS, None,
+        ('v2f/static', list(chain.from_iterable(westBorderPoints))),
+        ('c3B/static', [0, 255, 0, 100, 255, 50]*int(len(westBorderPoints)/2))
+    )
+    east_vertex_list = batch.add(len(eastBorderPoints), pyglet.gl.GL_POINTS, None,
+        ('v2f/static', list(chain.from_iterable(eastBorderPoints))),
+        ('c3B/static', [0, 0, 255, 100, 50, 255]*int(len(eastBorderPoints)/2))
+    )
+
 
     # Calculate intersection points for east line segments (and then west)
     #for intersectionIndex in range(len(intersectionNormals)):
