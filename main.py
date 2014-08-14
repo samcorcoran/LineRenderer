@@ -132,10 +132,23 @@ def createPoints():
         else:
             print("i=%d, right turn" % i)
 
+    # Calculate intersection points for east line segments (and then west) using normal offsets from corners
+    eastIntersectionPoints = list()
+    westIntersectionPoints = list()
+    for i in range(len(intersectionNormals)):
+        eastIntersection = (points[i+1][0] - intersectionNormals[i][0]*halfLineWidth, points[i+1][1] - intersectionNormals[i][1]*halfLineWidth)
+        eastIntersectionPoints.append(eastIntersection)
+        westIntersection = (points[i+1][0] + intersectionNormals[i][0]*halfLineWidth, points[i+1][1] + intersectionNormals[i][1]*halfLineWidth)
+        westIntersectionPoints.append(westIntersection)
+    east_inters_vertex_list = batch.add(len(eastIntersectionPoints), pyglet.gl.GL_LINE_LOOP, None,
+        ('v2f/static', list(chain.from_iterable(eastIntersectionPoints))),
+        ('c3B/static', [255, 0, 0]*len(eastIntersectionPoints))
+    )
+    west_inters_vertex_list = batch.add(len(westIntersectionPoints), pyglet.gl.GL_LINE_LOOP, None,
+        ('v2f/static', list(chain.from_iterable(westIntersectionPoints))),
+        ('c3B/static', [200, 0, 0]*len(westIntersectionPoints))
+    )
 
-
-    # Calculate intersection points for east line segments (and then west)
-    #for intersectionIndex in range(len(intersectionNormals)):
 
 class GameWindow(pyglet.window.Window):
     def __init__(self, *args, **kwargs):
