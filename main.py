@@ -33,7 +33,7 @@ def drawVector(start, vector, col = [255,255,255]):
 
 def createPoints():
     # Manual points
-    points.extend([(100, 400), (200, 500), (300, 400), (500, 400), (500, 200), (400, 200), (100, 400)])
+    points.extend([(100, 400), (200, 500), (300, 400), (350,550), (375,400), (500, 400), (500, 200), (400, 200), (100, 400)])
     printPoints("Initial points", points)
     pointCols = [255, 0, 0] * len(points)
     points_vertex_list = batch.add(len(points), pyglet.gl.GL_POINTS, None,
@@ -109,6 +109,29 @@ def createPoints():
         ('v2f/static', list(chain.from_iterable(eastBorderPoints))),
         ('c3B/static', [0, 0, 255, 100, 50, 255]*int(len(eastBorderPoints)/2))
     )
+    west_line_vertex_list = batch.add(len(westBorderPoints), pyglet.gl.GL_LINE_LOOP, None,
+        ('v2f/static', list(chain.from_iterable(westBorderPoints))),
+        ('c3B/static', [0, 255, 0, 100, 255, 50]*int(len(westBorderPoints)/2))
+    )
+    east_line_vertex_list = batch.add(len(eastBorderPoints), pyglet.gl.GL_LINE_LOOP, None,
+        ('v2f/static', list(chain.from_iterable(eastBorderPoints))),
+        ('c3B/static', [0, 0, 255, 100, 50, 255]*int(len(eastBorderPoints)/2))
+    )
+
+    # Print whether line is making left or right turns
+    for i in range(len(lineVecs)):
+        if i == len(lineVecs)-1:
+            continue
+        v1 = normalize(lineVecs[i])
+        v2 = normalize(lineVecs[i+1])
+        position = v1[0]*v2[1] - v1[1]*v2[0]
+        if (position == 0):
+            print("i=%d, straight ahead" % i)
+        elif (position > 0):
+            print("i=%d, left turn" % i)
+        else:
+            print("i=%d, right turn" % i)
+
 
 
     # Calculate intersection points for east line segments (and then west)
