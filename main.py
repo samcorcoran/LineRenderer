@@ -3,6 +3,13 @@ import random
 import math
 from itertools import chain
 
+drawOriginalPoints = True
+drawOriginalLines = True
+drawFixedWidthBorder = False
+drawFixedWidthAtIntersectionBorder = False
+drawVectors = False
+drawEastAcutePointLines = True
+
 batch = pyglet.graphics.Batch()
 
 xMax = 600
@@ -31,20 +38,39 @@ def drawVector(start, vector, col = [255,255,255]):
         ('c3B/static', col+col)
     )
 
+def calcLineIntersection(p1, p2, p3, p4):
+    # First line: Pa = p1 + u1(p2-p1)
+    # Second line: Pb = p3 + u2(p4-p3)
+    # Unknowns
+    denominator = ((p4[1]-p3[1])*(p2[0]-p1[0]) - (p4[0]-p3[0])*(p2[1]-p1[1]))
+    u1 = ((p4[0]-p3[0])*(p1[1]-p3[1]) - (p4[1]-p3[1])*(p1[0]-p3[0]))/denominator
+    # Don't even need to calculate the second, but here it is
+    #u2 = ((p2[0]-p1[0])*(p1[1]-p3[1]) - (p2[1]-p1[1])*(p1[0]-p3[0]))/denominator
+    x = p1[0]+(u1*(p2[0]-p1[0]))
+    y = p1[1]+(u1*(p2[1]-p1[1]))
+    # Notes:
+    # If denominator is zero, lines are parallel
+    # Intersection is for infinite lines. If line segment intersection is necessary
+    #   must test if u1 and u2 are between 0 and 1.
+    # This link was very helpful: http://paulbourke.net/geometry/pointlineplane/
+    return x, y
+
 def createPoints():
     # Manual points
     points.extend([(100, 400), (200, 500), (300, 400), (350,550), (375,400), (500, 400), (500, 200), (400, 200), (100, 400)])
     printPoints("Initial points", points)
     pointCols = [255, 0, 0] * len(points)
-    points_vertex_list = batch.add(len(points), pyglet.gl.GL_POINTS, None,
-        ('v2f/static', list(chain.from_iterable(points))),
-        ('c3B/static', pointCols)
-    )
-    lineSegmentCols = [255, 255, 0] * (len(points))
-    line_segments_vertex_list = batch.add(len(points), pyglet.gl.GL_LINE_LOOP, None,
-        ('v2f/static', list(chain.from_iterable(points))),
-        ('c3B/static', lineSegmentCols)
-    )
+    if drawOriginalPoints:
+        points_vertex_list = batch.add(len(points), pyglet.gl.GL_POINTS, None,
+            ('v2f/static', list(chain.from_iterable(points))),
+            ('c3B/static', pointCols)
+        )
+    if drawOriginalLines:
+        lineSegmentCols = [255, 255, 0] * (len(points))
+        line_segments_vertex_list = batch.add(len(points), pyglet.gl.GL_LINE_LOOP, None,
+            ('v2f/static', list(chain.from_iterable(points))),
+            ('c3B/static', lineSegmentCols)
+        )
 
     # Calculate line segment normals
     lineVecs = list()
@@ -66,7 +92,8 @@ def createPoints():
             (points[pIndex][0] + points[pIndex+1][0])/2,
             (points[pIndex][1] + points[pIndex+1][1])/2
         )
-        drawVector(midpoint, unitNormalVec, [120,222,240])
+        if drawVectors:
+            drawVector(midpoint, unitNormalVec, [120,222,240])
 
     printPoints("line vectors", lineVecs)
     printPoints("line normals", lineNormals)
@@ -80,7 +107,8 @@ def createPoints():
         intersectionNormal = normalize((xComp, yComp))
         intersectionNormals.append(intersectionNormal)
         # Visualize normal
-        drawVector(points[lineIndex+1], intersectionNormal, [200,250,150])
+        if drawVectors:
+            drawVector(points[lineIndex+1], intersectionNormal, [200,250,150])
 
 
     printPoints("intersection normals", intersectionNormals)
@@ -101,22 +129,23 @@ def createPoints():
         eY = p[1]-(lineNormals[pIndex][1]*halfLineWidth)
         eastBorderPoints.append( (eX, eY) )
         eastBorderPoints.append( (eX+lineVecs[pIndex][0], eY+lineVecs[pIndex][1]) )
-    west_vertex_list = batch.add(len(westBorderPoints), pyglet.gl.GL_POINTS, None,
-        ('v2f/static', list(chain.from_iterable(westBorderPoints))),
-        ('c3B/static', [0, 255, 0, 100, 255, 50]*int(len(westBorderPoints)/2))
-    )
-    east_vertex_list = batch.add(len(eastBorderPoints), pyglet.gl.GL_POINTS, None,
-        ('v2f/static', list(chain.from_iterable(eastBorderPoints))),
-        ('c3B/static', [0, 0, 255, 100, 50, 255]*int(len(eastBorderPoints)/2))
-    )
-    west_line_vertex_list = batch.add(len(westBorderPoints), pyglet.gl.GL_LINE_LOOP, None,
-        ('v2f/static', list(chain.from_iterable(westBorderPoints))),
-        ('c3B/static', [0, 255, 0, 100, 255, 50]*int(len(westBorderPoints)/2))
-    )
-    east_line_vertex_list = batch.add(len(eastBorderPoints), pyglet.gl.GL_LINE_LOOP, None,
-        ('v2f/static', list(chain.from_iterable(eastBorderPoints))),
-        ('c3B/static', [0, 0, 255, 100, 50, 255]*int(len(eastBorderPoints)/2))
-    )
+    if drawFixedWidthBorder:
+        west_vertex_list = batch.add(len(westBorderPoints), pyglet.gl.GL_POINTS, None,
+            ('v2f/static', list(chain.from_iterable(westBorderPoints))),
+            ('c3B/static', [0, 255, 0, 100, 255, 50]*int(len(westBorderPoints)/2))
+        )
+        east_vertex_list = batch.add(len(eastBorderPoints), pyglet.gl.GL_POINTS, None,
+            ('v2f/static', list(chain.from_iterable(eastBorderPoints))),
+            ('c3B/static', [0, 0, 255, 100, 50, 255]*int(len(eastBorderPoints)/2))
+        )
+        west_line_vertex_list = batch.add(len(westBorderPoints), pyglet.gl.GL_LINE_LOOP, None,
+            ('v2f/static', list(chain.from_iterable(westBorderPoints))),
+            ('c3B/static', [0, 255, 0, 100, 255, 50]*int(len(westBorderPoints)/2))
+        )
+        east_line_vertex_list = batch.add(len(eastBorderPoints), pyglet.gl.GL_LINE_LOOP, None,
+            ('v2f/static', list(chain.from_iterable(eastBorderPoints))),
+            ('c3B/static', [0, 0, 255, 100, 50, 255]*int(len(eastBorderPoints)/2))
+        )
 
     # Print whether line is making left or right turns
     for i in range(len(lineVecs)):
@@ -140,15 +169,69 @@ def createPoints():
         eastIntersectionPoints.append(eastIntersection)
         westIntersection = (points[i+1][0] + intersectionNormals[i][0]*halfLineWidth, points[i+1][1] + intersectionNormals[i][1]*halfLineWidth)
         westIntersectionPoints.append(westIntersection)
-    east_inters_vertex_list = batch.add(len(eastIntersectionPoints), pyglet.gl.GL_LINE_LOOP, None,
-        ('v2f/static', list(chain.from_iterable(eastIntersectionPoints))),
-        ('c3B/static', [255, 0, 0]*len(eastIntersectionPoints))
-    )
-    west_inters_vertex_list = batch.add(len(westIntersectionPoints), pyglet.gl.GL_LINE_LOOP, None,
-        ('v2f/static', list(chain.from_iterable(westIntersectionPoints))),
-        ('c3B/static', [200, 0, 0]*len(westIntersectionPoints))
-    )
+    if drawFixedWidthAtIntersectionBorder:
+        east_inters_vertex_list = batch.add(len(eastIntersectionPoints), pyglet.gl.GL_LINE_LOOP, None,
+            ('v2f/static', list(chain.from_iterable(eastIntersectionPoints))),
+            ('c3B/static', [255, 0, 0]*len(eastIntersectionPoints))
+        )
+        west_inters_vertex_list = batch.add(len(westIntersectionPoints), pyglet.gl.GL_LINE_LOOP, None,
+            ('v2f/static', list(chain.from_iterable(westIntersectionPoints))),
+            ('c3B/static', [200, 0, 0]*len(westIntersectionPoints))
+        )
 
+    # Loop over intersections
+    # On inside of turn, find where entering/exiting lines meet, use point
+    # On outside of turn...
+    # * stop at same length of acute line
+    # * next point is intersection normal, at dist of line width
+    # * subdivide if desired
+    eastAcutePoints = list()
+    eastAcuteConstructionLines = list()
+    for i in range(len(lineVecs)):
+        next = (i+1)%len(lineVecs)
+        nexter = (i+2)%len(lineVecs)
+        v1 = normalize(lineVecs[i])
+        v2 = normalize(lineVecs[next])
+        position = v1[0]*v2[1] - v1[1]*v2[0]
+        if (position == 0):
+            print("i=%d, straight ahead" % i)
+            # ignore points here... let next vector dictate them
+            continue
+        elif (position > 0):
+            # Left turn, west border is acute
+            print("i=%d, left turn" % i)
+        else:
+            # Right turn, east border is acute
+            # Inverted normal to get normal on east side
+            eX1 = points[i][0]+(-lineNormals[i][0]*halfLineWidth)
+            eY1 = points[i][1]+(-lineNormals[i][1]*halfLineWidth)
+            # Vector from current point, into intersection
+            v1 = (points[next][0]-points[i][0], points[next][1]-points[i][1])
+            # Point on line parallel to line leaving intersection point
+            eX2 = points[nexter][0]+(-lineNormals[next][0]*halfLineWidth)
+            eY2 = points[nexter][1]+(-lineNormals[next][1]*halfLineWidth)
+            # Vector from point after intersection, pointing back into it
+            v2 = (points[next][0]-points[nexter][0], points[next][1]-points[nexter][1])
+
+            # Gives
+            p1 = (eX1, eY1)
+            p2 = (eX1+v1[0], eY1+v1[1])
+            # and
+            p3 = (eX2, eY2)
+            p4 = (eX2+v2[0], eY2+v2[1])
+            xInter, yInter = calcLineIntersection(p1, p2, p3, p4)
+            eastAcutePoints.append((xInter, yInter))
+            eastAcuteConstructionLines.extend([p1, p2, p3, p4])
+    if True:
+        east_acute_construction_vertex_list = batch.add(len(eastAcuteConstructionLines), pyglet.gl.GL_LINES, None,
+            ('v2f/static', list(chain.from_iterable(eastAcuteConstructionLines))),
+            ('c3B/static', [25, 180, 60]*len(eastAcuteConstructionLines))
+        )
+    if drawEastAcutePointLines:
+        east_acute_vertex_list = batch.add(len(eastAcutePoints), pyglet.gl.GL_LINE_LOOP, None,
+            ('v2f/static', list(chain.from_iterable(eastAcutePoints))),
+            ('c3B/static', [200, 0, 0]*len(eastAcutePoints))
+        )
 
 class GameWindow(pyglet.window.Window):
     def __init__(self, *args, **kwargs):
