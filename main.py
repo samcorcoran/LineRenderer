@@ -221,24 +221,18 @@ def createPoints():
         elif (position > 0):
             # Left turn, west border is acute
 
-            # Add east point as intersection normal * lineWidth
-            intersectionNormal = normalize(intersectionNormals[i%len(intersectionNormals)])
-            # Uses point i+1 as this process is working out the termination points for the end of the next vector
-            x = points[next][0] - intersectionNormal[0]*halfLineWidth
-            y = points[next][1] - intersectionNormal[1]*halfLineWidth
-            eastPoints.append((x,y))
-
             ## Calculate WEST acute points
-            wX1 = points[i][0]+(lineNormals[i][0]*halfLineWidth)
-            wY1 = points[i][1]+(lineNormals[i][1]*halfLineWidth)
+            line1Norm = (lineNormals[i][0]*halfLineWidth, lineNormals[i][1]*halfLineWidth)
+            wX1 = points[i][0] + line1Norm[0]
+            wY1 = points[i][1] + line1Norm[1]
             # Vector from current point, into intersection
             v1 = (points[next][0]-points[i][0], points[next][1]-points[i][1])
             # Point on line parallel to line leaving intersection point
-            wX2 = points[nexter][0]+(lineNormals[next][0]*halfLineWidth)
-            wY2 = points[nexter][1]+(lineNormals[next][1]*halfLineWidth)
+            line2Norm = (lineNormals[next][0]*halfLineWidth, lineNormals[next][1]*halfLineWidth)
+            wX2 = points[nexter][0] + line2Norm[0]
+            wY2 = points[nexter][1] + line2Norm[1]
             # Vector from point after intersection, pointing back into it
             v2 = (points[next][0]-points[nexter][0], points[next][1]-points[nexter][1])
-
             # Gives
             p1 = (wX1, wY1)
             p2 = (wX1+v1[0], wY1+v1[1])
@@ -248,19 +242,38 @@ def createPoints():
             xInter, yInter = calcLineIntersection(p1, p2, p3, p4)
             westPoints.append((xInter, yInter))
             westConstructionLines.extend([p1, p2, p3, p4])
+
+            ## Calculate EAST obtuse points
+            # Uses point i+1 (i.e. next) as this process is working out the termination points for the end of the next vector
+            eX1 = points[i][0] - line1Norm[0]
+            eY1 = points[i][1] - line1Norm[1]
+            drawVector(points[next], line1Norm)
+            eX2 = points[nexter][0] - line2Norm[0]
+            eY2 = points[nexter][1] - line2Norm[1]
+            drawVector(points[nexter], line2Norm, (50, 50, 50))
+            # Gives
+            p1 = (eX1, eY1)
+            p2 = (eX1+v1[0], eY1+v1[1])
+            # and
+            p3 = (eX2, eY2)
+            p4 = (eX2+v2[0], eY2+v2[1])
+            xInter, yInter = calcLineIntersection(p1, p2, p3, p4)
+            eastPoints.append((xInter, yInter))
+            eastConstructionLines.extend([p1, p2])
         else:
             # Right turn, east border is acute
 
             ## Calculate EAST acute points
             # Inverted normal to get normal on east side
-            eX1 = points[i][0]+(-lineNormals[i][0]*halfLineWidth)
-            #print("Line normal mag: %f" % mag(lineNormals[i]))
-            eY1 = points[i][1]+(-lineNormals[i][1]*halfLineWidth)
+            line1Norm = (lineNormals[i][0]*halfLineWidth, lineNormals[i][1]*halfLineWidth)
+            eX1 = points[i][0]-line1Norm[0]
+            eY1 = points[i][1]-line1Norm[1]
             # Vector from current point, into intersection
             v1 = (points[next][0]-points[i][0], points[next][1]-points[i][1])
             # Point on line parallel to line leaving intersection point
-            eX2 = points[nexter][0]+(-lineNormals[next][0]*halfLineWidth)
-            eY2 = points[nexter][1]+(-lineNormals[next][1]*halfLineWidth)
+            line2Norm = (lineNormals[next][0]*halfLineWidth, lineNormals[next][1]*halfLineWidth)
+            eX2 = points[nexter][0]-line2Norm[0]
+            eY2 = points[nexter][1]-line2Norm[1]
             # Vector from point after intersection, pointing back into it
             v2 = (points[next][0]-points[nexter][0], points[next][1]-points[nexter][1])
 
@@ -274,22 +287,23 @@ def createPoints():
             eastPoints.append((xInter, yInter))
             eastConstructionLines.extend([p1, p2, p3, p4])
 
-            #print("East Acute")
-            #print("intersection point: %f, %f" % (xInter, yInter))
-            #print("p1: %f,%f" % (p1[0], p1[1]))
-
             ## Calculate WEST obtuse points
-            # Add west point as intersection normal * lineWidth
-            #print("West obtuse")
-            intersectionNormal = normalize(intersectionNormals[i%len(intersectionNormals)])
             # Uses point i+1 (i.e. next) as this process is working out the termination points for the end of the next vector
-            x = points[next][0] + intersectionNormal[0]*halfLineWidth
-            y = points[next][1] + intersectionNormal[1]*halfLineWidth
-            #print("New point: %f,%f" %(x, y))
-            #print("line width: %f" % lineWidth)
-            #print("mag: %f" % mag((intersectionNormal[0]*halfLineWidth, intersectionNormal[1]*halfLineWidth)))
-            #print("Intersection normal: %f,%f" % (intersectionNormal[0], intersectionNormal[1]))
-            westPoints.append((x,y))
+            wX1 = points[i][0] + line1Norm[0]
+            wY1 = points[i][1] + line1Norm[1]
+            drawVector(points[next], line1Norm)
+            wX2 = points[nexter][0] + line2Norm[0]
+            wY2 = points[nexter][1] + line2Norm[1]
+            drawVector(points[nexter], line2Norm, (50, 50, 50))
+            # Gives
+            p1 = (wX1, wY1)
+            p2 = (wX1+v1[0], wY1+v1[1])
+            # and
+            p3 = (wX2, wY2)
+            p4 = (wX2+v2[0], wY2+v2[1])
+            xInter, yInter = calcLineIntersection(p1, p2, p3, p4)
+            westPoints.append((xInter, yInter))
+            westConstructionLines.extend([p1, p2])
 
     if drawEastMitreConstructionLines:
         east_acute_construction_vertex_list = batch.add(len(eastConstructionLines), pyglet.gl.GL_LINES, None,
@@ -324,7 +338,7 @@ class GameWindow(pyglet.window.Window):
 
 if __name__ == '__main__':
     print("Running app")
-    window = GameWindow(xMax, yMax, caption="Hexagons", resizable=True, vsync=False)
+    window = GameWindow(xMax, yMax, caption="LineRenderer", resizable=True, vsync=False)
     # Pyglet FPS Overlay
     fps_display = pyglet.clock.ClockDisplay()
     # Call update 120 per second
