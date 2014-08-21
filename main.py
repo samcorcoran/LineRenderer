@@ -8,7 +8,10 @@ drawOriginalLines = True
 drawFixedWidthBorder = False
 drawFixedWidthAtIntersectionBorder = False
 drawVectors = False
-drawEastAcutePointLines = True
+drawEastMitrePointLines = True
+drawEastMitreConstructionLines = False
+drawWestMitrePointLines = True
+drawWestMitreConstructionLines = False
 
 batch = pyglet.graphics.Batch()
 
@@ -18,7 +21,7 @@ yMax = 600
 numPoints = 3
 points = list()
 
-lineWidth = 20
+lineWidth = 30
 halfLineWidth = lineWidth/2
 
 def printPoints(listName, pointList):
@@ -30,11 +33,20 @@ def normalize(vec):
     magnitude = math.sqrt(vec[0]**2 + vec[1]**2)
     return (vec[0]/magnitude, vec[1]/magnitude)
 
-def drawVector(start, vector, col = [255,255,255]):
-    v = normalize(vector)
-    drawnLength = 20
+def mag(vec):
+    return math.sqrt(vec[0]**2 + vec[1]**2)
+
+def drawVector(start, vector, col = [255,255,255], norm=True):
+    v = 0
+    if norm:
+        v = normalize(vector)
+    else:
+        v = vector
+    drawnLengthMultiplier = 20
+    if not norm:
+        drawnLengthMultiplier = 1
     batch.add(2, pyglet.gl.GL_LINES, None,
-        ('v2f/static', [start[0], start[1], start[0]+v[0]*drawnLength, start[1]+v[1]*drawnLength]),
+        ('v2f/static', [start[0], start[1], start[0]+v[0]*drawnLengthMultiplier, start[1]+v[1]*drawnLengthMultiplier]),
         ('c3B/static', col+col)
     )
 
@@ -155,11 +167,14 @@ def createPoints():
         v2 = normalize(lineVecs[i+1])
         position = v1[0]*v2[1] - v1[1]*v2[0]
         if (position == 0):
-            print("i=%d, straight ahead" % i)
+            #print("i=%d, straight ahead" % i)
+            pass
         elif (position > 0):
-            print("i=%d, left turn" % i)
+            #print("i=%d, left turn" % i)
+            pass
         else:
-            print("i=%d, right turn" % i)
+            #print("i=%d, right turn" % i)
+            pass
 
     # Calculate intersection points for east line segments (and then west) using normal offsets from corners
     eastIntersectionPoints = list()
@@ -185,11 +200,17 @@ def createPoints():
     # * stop at same length of acute line
     # * next point is intersection normal, at dist of line width
     # * subdivide if desired
-    eastAcutePoints = list()
-    eastAcuteConstructionLines = list()
+    eastPoints = list()
+    eastConstructionLines = list()
+    westPoints = list()
+    westConstructionLines = list()
     for i in range(len(lineVecs)):
+        #print("\ni = %d" % i)
+        #print("ith Point: %f,%f" % (points[i][0], points[i][1]))
         next = (i+1)%len(lineVecs)
+        #print("next Point: %f,%f" % (points[next][0], points[next][1]))
         nexter = (i+2)%len(lineVecs)
+        nextIntersection = (i+1)%len(intersectionNormals)
         v1 = normalize(lineVecs[i])
         v2 = normalize(lineVecs[next])
         position = v1[0]*v2[1] - v1[1]*v2[0]
@@ -199,11 +220,41 @@ def createPoints():
             continue
         elif (position > 0):
             # Left turn, west border is acute
-            print("i=%d, left turn" % i)
+
+            # Add east point as intersection normal * lineWidth
+            intersectionNormal = normalize(intersectionNormals[i%len(intersectionNormals)])
+            # Uses point i+1 as this process is working out the termination points for the end of the next vector
+            x = points[next][0] - intersectionNormal[0]*halfLineWidth
+            y = points[next][1] - intersectionNormal[1]*halfLineWidth
+            eastPoints.append((x,y))
+
+            ## Calculate WEST acute points
+            wX1 = points[i][0]+(lineNormals[i][0]*halfLineWidth)
+            wY1 = points[i][1]+(lineNormals[i][1]*halfLineWidth)
+            # Vector from current point, into intersection
+            v1 = (points[next][0]-points[i][0], points[next][1]-points[i][1])
+            # Point on line parallel to line leaving intersection point
+            wX2 = points[nexter][0]+(lineNormals[next][0]*halfLineWidth)
+            wY2 = points[nexter][1]+(lineNormals[next][1]*halfLineWidth)
+            # Vector from point after intersection, pointing back into it
+            v2 = (points[next][0]-points[nexter][0], points[next][1]-points[nexter][1])
+
+            # Gives
+            p1 = (wX1, wY1)
+            p2 = (wX1+v1[0], wY1+v1[1])
+            # and
+            p3 = (wX2, wY2)
+            p4 = (wX2+v2[0], wY2+v2[1])
+            xInter, yInter = calcLineIntersection(p1, p2, p3, p4)
+            westPoints.append((xInter, yInter))
+            westConstructionLines.extend([p1, p2, p3, p4])
         else:
             # Right turn, east border is acute
+
+            ## Calculate EAST acute points
             # Inverted normal to get normal on east side
             eX1 = points[i][0]+(-lineNormals[i][0]*halfLineWidth)
+            #print("Line normal mag: %f" % mag(lineNormals[i]))
             eY1 = points[i][1]+(-lineNormals[i][1]*halfLineWidth)
             # Vector from current point, into intersection
             v1 = (points[next][0]-points[i][0], points[next][1]-points[i][1])
@@ -220,19 +271,46 @@ def createPoints():
             p3 = (eX2, eY2)
             p4 = (eX2+v2[0], eY2+v2[1])
             xInter, yInter = calcLineIntersection(p1, p2, p3, p4)
-            eastAcutePoints.append((xInter, yInter))
-            eastAcuteConstructionLines.extend([p1, p2, p3, p4])
-    if True:
-        east_acute_construction_vertex_list = batch.add(len(eastAcuteConstructionLines), pyglet.gl.GL_LINES, None,
-            ('v2f/static', list(chain.from_iterable(eastAcuteConstructionLines))),
-            ('c3B/static', [25, 180, 60]*len(eastAcuteConstructionLines))
-        )
-    if drawEastAcutePointLines:
-        east_acute_vertex_list = batch.add(len(eastAcutePoints), pyglet.gl.GL_LINE_LOOP, None,
-            ('v2f/static', list(chain.from_iterable(eastAcutePoints))),
-            ('c3B/static', [200, 0, 0]*len(eastAcutePoints))
-        )
+            eastPoints.append((xInter, yInter))
+            eastConstructionLines.extend([p1, p2, p3, p4])
 
+            #print("East Acute")
+            #print("intersection point: %f, %f" % (xInter, yInter))
+            #print("p1: %f,%f" % (p1[0], p1[1]))
+
+            ## Calculate WEST obtuse points
+            # Add west point as intersection normal * lineWidth
+            #print("West obtuse")
+            intersectionNormal = normalize(intersectionNormals[i%len(intersectionNormals)])
+            # Uses point i+1 (i.e. next) as this process is working out the termination points for the end of the next vector
+            x = points[next][0] + intersectionNormal[0]*halfLineWidth
+            y = points[next][1] + intersectionNormal[1]*halfLineWidth
+            #print("New point: %f,%f" %(x, y))
+            #print("line width: %f" % lineWidth)
+            #print("mag: %f" % mag((intersectionNormal[0]*halfLineWidth, intersectionNormal[1]*halfLineWidth)))
+            #print("Intersection normal: %f,%f" % (intersectionNormal[0], intersectionNormal[1]))
+            westPoints.append((x,y))
+
+    if drawEastMitreConstructionLines:
+        east_acute_construction_vertex_list = batch.add(len(eastConstructionLines), pyglet.gl.GL_LINES, None,
+            ('v2f/static', list(chain.from_iterable(eastConstructionLines))),
+            ('c3B/static', [25, 180, 60]*len(eastConstructionLines))
+        )
+    if drawEastMitrePointLines:
+        east_acute_vertex_list = batch.add(len(eastPoints), pyglet.gl.GL_LINE_LOOP, None,
+            ('v2f/static', list(chain.from_iterable(eastPoints))),
+            ('c3B/static', [200, 0, 0]*len(eastPoints))
+        )
+    if drawWestMitreConstructionLines:
+        west_acute_construction_vertex_list = batch.add(len(westConstructionLines), pyglet.gl.GL_LINES, None,
+            ('v2f/static', list(chain.from_iterable(westConstructionLines))),
+            ('c3B/static', [25, 180, 60]*len(westConstructionLines))
+        )
+    if drawWestMitrePointLines:
+        west_acute_vertex_list = batch.add(len(westPoints), pyglet.gl.GL_LINE_LOOP, None,
+            ('v2f/static', list(chain.from_iterable(westPoints))),
+            ('c3B/static', [0, 0, 200]*len(westPoints))
+        )
 class GameWindow(pyglet.window.Window):
     def __init__(self, *args, **kwargs):
         pyglet.window.Window.__init__(self, *args, **kwargs)
