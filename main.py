@@ -55,6 +55,9 @@ def calcLineIntersection(p1, p2, p3, p4):
     # Second line: Pb = p3 + u2(p4-p3)
     # Unknowns
     denominator = ((p4[1]-p3[1])*(p2[0]-p1[0]) - (p4[0]-p3[0])*(p2[1]-p1[1]))
+    if denominator == 0:
+        # Use 0, 0 as an obvious diagnostic indicator that something is wrong
+        return 0, 0
     u1 = ((p4[0]-p3[0])*(p1[1]-p3[1]) - (p4[1]-p3[1])*(p1[0]-p3[0]))/denominator
     # Don't even need to calculate the second, but here it is
     #u2 = ((p2[0]-p1[0])*(p1[1]-p3[1]) - (p2[1]-p1[1])*(p1[0]-p3[0]))/denominator
@@ -69,7 +72,7 @@ def calcLineIntersection(p1, p2, p3, p4):
 
 def createPoints():
     # Manual points
-    points.extend([(100, 400), (200, 500), (300, 400), (350,550), (375,400), (500, 400), (500, 200), (400, 200), (100, 400)])
+    points.extend([(100, 400), (200, 500), (300, 400), (350,550), (375,400), (500, 400), (500, 200), (400, 200)])
     printPoints("Initial points", points)
     pointCols = [255, 0, 0] * len(points)
     if drawOriginalPoints:
@@ -207,32 +210,31 @@ def createPoints():
     for i in range(len(lineVecs)):
         #print("\ni = %d" % i)
         #print("ith Point: %f,%f" % (points[i][0], points[i][1]))
-        next = (i+1)%len(lineVecs)
-        #print("next Point: %f,%f" % (points[next][0], points[next][1]))
-        nexter = (i+2)%len(lineVecs)
-        nextIntersection = (i+1)%len(intersectionNormals)
-        v1 = normalize(lineVecs[i])
-        v2 = normalize(lineVecs[next])
+        prever = i-2
+        prev = i-1
+        current = i
+        v1 = normalize(lineVecs[prever])
+        v2 = normalize(lineVecs[prev])
         position = v1[0]*v2[1] - v1[1]*v2[0]
         if (position == 0):
-            print("i=%d, straight ahead" % i)
-            # ignore points here... let next vector dictate them
+            print("i=%d, straight ahead" % prever)
+            # ignore points here... let prev vector dictate them
             continue
         elif (position > 0):
             # Left turn, west border is acute
 
             ## Calculate WEST acute points
-            line1Norm = (lineNormals[i][0]*halfLineWidth, lineNormals[i][1]*halfLineWidth)
-            wX1 = points[i][0] + line1Norm[0]
-            wY1 = points[i][1] + line1Norm[1]
+            line1Norm = (lineNormals[prever][0]*halfLineWidth, lineNormals[prever][1]*halfLineWidth)
+            wX1 = points[prever][0] + line1Norm[0]
+            wY1 = points[prever][1] + line1Norm[1]
             # Vector from current point, into intersection
-            v1 = (points[next][0]-points[i][0], points[next][1]-points[i][1])
+            v1 = (points[prev][0]-points[prever][0], points[prev][1]-points[prever][1])
             # Point on line parallel to line leaving intersection point
-            line2Norm = (lineNormals[next][0]*halfLineWidth, lineNormals[next][1]*halfLineWidth)
-            wX2 = points[nexter][0] + line2Norm[0]
-            wY2 = points[nexter][1] + line2Norm[1]
+            line2Norm = (lineNormals[prev][0]*halfLineWidth, lineNormals[prev][1]*halfLineWidth)
+            wX2 = points[current][0] + line2Norm[0]
+            wY2 = points[current][1] + line2Norm[1]
             # Vector from point after intersection, pointing back into it
-            v2 = (points[next][0]-points[nexter][0], points[next][1]-points[nexter][1])
+            v2 = (points[prev][0]-points[current][0], points[prev][1]-points[current][1])
             # Gives
             p1 = (wX1, wY1)
             p2 = (wX1+v1[0], wY1+v1[1])
@@ -244,13 +246,13 @@ def createPoints():
             westConstructionLines.extend([p1, p2, p3, p4])
 
             ## Calculate EAST obtuse points
-            # Uses point i+1 (i.e. next) as this process is working out the termination points for the end of the next vector
-            eX1 = points[i][0] - line1Norm[0]
-            eY1 = points[i][1] - line1Norm[1]
-            drawVector(points[next], line1Norm)
-            eX2 = points[nexter][0] - line2Norm[0]
-            eY2 = points[nexter][1] - line2Norm[1]
-            drawVector(points[nexter], line2Norm, (50, 50, 50))
+            # Uses point i+1 (i.e. prev) as this process is working out the termination points for the end of the prev vector
+            eX1 = points[prever][0] - line1Norm[0]
+            eY1 = points[prever][1] - line1Norm[1]
+            drawVector(points[prev], line1Norm)
+            eX2 = points[current][0] - line2Norm[0]
+            eY2 = points[current][1] - line2Norm[1]
+            drawVector(points[current], line2Norm, (50, 50, 50))
             # Gives
             p1 = (eX1, eY1)
             p2 = (eX1+v1[0], eY1+v1[1])
@@ -265,36 +267,49 @@ def createPoints():
 
             ## Calculate EAST acute points
             # Inverted normal to get normal on east side
-            line1Norm = (lineNormals[i][0]*halfLineWidth, lineNormals[i][1]*halfLineWidth)
-            eX1 = points[i][0]-line1Norm[0]
-            eY1 = points[i][1]-line1Norm[1]
+            line1Norm = (lineNormals[prever][0]*halfLineWidth, lineNormals[prever][1]*halfLineWidth)
+            eX1 = points[prever][0]-line1Norm[0]
+            eY1 = points[prever][1]-line1Norm[1]
             # Vector from current point, into intersection
-            v1 = (points[next][0]-points[i][0], points[next][1]-points[i][1])
+            v1 = (points[prev][0]-points[prever][0], points[prev][1]-points[prever][1])
             # Point on line parallel to line leaving intersection point
-            line2Norm = (lineNormals[next][0]*halfLineWidth, lineNormals[next][1]*halfLineWidth)
-            eX2 = points[nexter][0]-line2Norm[0]
-            eY2 = points[nexter][1]-line2Norm[1]
+            line2Norm = (lineNormals[prev][0]*halfLineWidth, lineNormals[prev][1]*halfLineWidth)
+            eX2 = points[current][0]-line2Norm[0]
+            eY2 = points[current][1]-line2Norm[1]
             # Vector from point after intersection, pointing back into it
-            v2 = (points[next][0]-points[nexter][0], points[next][1]-points[nexter][1])
-
+            print("prev: " + str(prev))
+            print("current: " + str(current))
+            v2 = (points[prev][0]-points[current][0], points[prev][1]-points[current][1])
+            print(points)
+            print(points[prev][0])
+            print(points[current][0])
+            print(points[prev][1])
+            print(points[current][1])
             # Gives
+            print("Test")
             p1 = (eX1, eY1)
             p2 = (eX1+v1[0], eY1+v1[1])
+            print(p1)
+            print(p2)
+            print(v1)
             # and
             p3 = (eX2, eY2)
             p4 = (eX2+v2[0], eY2+v2[1])
+            print(p3)
+            print(p4)
+            print(v2)
             xInter, yInter = calcLineIntersection(p1, p2, p3, p4)
             eastPoints.append((xInter, yInter))
             eastConstructionLines.extend([p1, p2, p3, p4])
 
             ## Calculate WEST obtuse points
-            # Uses point i+1 (i.e. next) as this process is working out the termination points for the end of the next vector
-            wX1 = points[i][0] + line1Norm[0]
-            wY1 = points[i][1] + line1Norm[1]
-            drawVector(points[next], line1Norm)
-            wX2 = points[nexter][0] + line2Norm[0]
-            wY2 = points[nexter][1] + line2Norm[1]
-            drawVector(points[nexter], line2Norm, (50, 50, 50))
+            # Uses point i+1 (i.e. prev) as this process is working out the termination points for the end of the prev vector
+            wX1 = points[prever][0] + line1Norm[0]
+            wY1 = points[prever][1] + line1Norm[1]
+            drawVector(points[prev], line1Norm)
+            wX2 = points[current][0] + line2Norm[0]
+            wY2 = points[current][1] + line2Norm[1]
+            drawVector(points[current], line2Norm, (50, 50, 50))
             # Gives
             p1 = (wX1, wY1)
             p2 = (wX1+v1[0], wY1+v1[1])
