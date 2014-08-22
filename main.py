@@ -21,7 +21,7 @@ yMax = 600
 numPoints = 3
 points = list()
 
-lineWidth = 30
+lineWidth = 50
 halfLineWidth = lineWidth/2
 
 def printPoints(listName, pointList):
@@ -248,10 +248,10 @@ def createPoints():
             # Uses point i+1 (i.e. prev) as this process is working out the termination points for the end of the prev vector
             eX1 = points[prever][0] - line1Norm[0]
             eY1 = points[prever][1] - line1Norm[1]
-            drawVector(points[prev], line1Norm)
+            #drawVector(points[prev], line1Norm)
             eX2 = points[current][0] - line2Norm[0]
             eY2 = points[current][1] - line2Norm[1]
-            drawVector(points[current], line2Norm, (50, 50, 50))
+            #drawVector(points[current], line2Norm, (50, 50, 50))
             # Gives
             p1 = (eX1, eY1)
             p2 = (eX1+v1[0], eY1+v1[1])
@@ -291,10 +291,10 @@ def createPoints():
             # Uses point i+1 (i.e. prev) as this process is working out the termination points for the end of the prev vector
             wX1 = points[prever][0] + line1Norm[0]
             wY1 = points[prever][1] + line1Norm[1]
-            drawVector(points[prev], line1Norm)
+            #drawVector(points[prev], line1Norm)
             wX2 = points[current][0] + line2Norm[0]
             wY2 = points[current][1] + line2Norm[1]
-            drawVector(points[current], line2Norm, (50, 50, 50))
+            #drawVector(points[current], line2Norm, (50, 50, 50))
             # Gives
             p1 = (wX1, wY1)
             p2 = (wX1+v1[0], wY1+v1[1])
