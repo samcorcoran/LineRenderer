@@ -1,7 +1,10 @@
-import pyglet
+from pyglet.gl import *
 import random
 import math
 from itertools import chain
+
+glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+glEnable(GL_BLEND)
 
 drawOriginalPoints = True
 drawOriginalLines = True
@@ -21,7 +24,7 @@ yMax = 600
 numPoints = 3
 points = list()
 
-lineWidth = 50
+lineWidth = 80
 halfLineWidth = lineWidth/2
 
 def printPoints(listName, pointList):
@@ -71,7 +74,7 @@ def calcLineIntersection(p1, p2, p3, p4):
     return x, y
 
 def createPoints():
-    groupNum = 0
+    groupNum = 1
 
     # Manual points
     points.extend([(100, 400), (200, 500), (300, 400), (350,550), (375,400), (500, 400), (500, 200), (400, 200)])
@@ -329,6 +332,41 @@ def createPoints():
             ('v2f/static', list(chain.from_iterable(westPoints))),
             ('c3B/static', [0, 0, 200]*len(westPoints))
         )
+
+    # Construct wide-line triangles
+    # West triangles
+    westTrianglePoints = list()
+    for pIndex in range(len(points)):
+        westTrianglePoints.append(points[pIndex-1])
+        westTrianglePoints.append(westPoints[pIndex])
+    westTrianglePoints.append(points[-1])
+    westTrianglePoints.append(westPoints[0])
+    westPointsGroup = pyglet.graphics.OrderedGroup(groupNum)
+    groupNum += 1
+    col = list()
+    for n in range(len(westTrianglePoints)):
+        col.extend([random.randint(0,255), random.randint(0,255), random.randint(0,255)])
+    west_acute_vertex_list = batch.add(len(westTrianglePoints), pyglet.gl.GL_TRIANGLE_STRIP, westPointsGroup,
+        ('v2f/static', list(chain.from_iterable(westTrianglePoints))),
+        ('c3B/static', col)
+    )
+    # East triangles
+    eastTrianglePoints = list()
+    for pIndex in range(len(points)):
+        eastTrianglePoints.append(points[pIndex-1])
+        eastTrianglePoints.append(eastPoints[pIndex])
+    eastTrianglePoints.append(points[-1])
+    eastTrianglePoints.append(eastPoints[0])
+    eastPointsGroup = pyglet.graphics.OrderedGroup(groupNum)
+    groupNum += 1
+    col = list()
+    for n in range(len(eastTrianglePoints)):
+        col.extend([random.randint(0,255), random.randint(0,255), random.randint(0,255)])
+    east_acute_vertex_list = batch.add(len(eastTrianglePoints), pyglet.gl.GL_TRIANGLE_STRIP, eastPointsGroup,
+        ('v2f/static', list(chain.from_iterable(eastTrianglePoints))),
+        ('c3B/static', col)
+    )
+
 class GameWindow(pyglet.window.Window):
     def __init__(self, *args, **kwargs):
         pyglet.window.Window.__init__(self, *args, **kwargs)
