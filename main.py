@@ -95,17 +95,16 @@ def createPoints():
     # Calc line segment normals
     for pIndex in range(len(points)):
         #print("pIndex: ", pIndex)
-        if (pIndex == len(points)-1):
-            continue
-        vec = (points[pIndex+1][0] - points[pIndex][0], points[pIndex+1][1] - points[pIndex][1])
+        nextPIndex = (pIndex+1)%len(points)
+        vec = (points[nextPIndex][0] - points[pIndex][0], points[nextPIndex][1] - points[pIndex][1])
         lineVecs.append(vec)
         normalVec = (-vec[1], vec[0])
         unitNormalVec = normalize(normalVec)
         lineNormals.append(unitNormalVec)
         # Visualize normal
         midpoint = (
-            (points[pIndex][0] + points[pIndex+1][0])/2,
-            (points[pIndex][1] + points[pIndex+1][1])/2
+            (points[pIndex][0] + points[nextPIndex][0])/2,
+            (points[pIndex][1] + points[nextPIndex][1])/2
         )
         if drawVectors:
             drawVector(midpoint, unitNormalVec, [120,222,240])
@@ -115,15 +114,14 @@ def createPoints():
 
     # Calc intersection normals
     for lineIndex in range(len(lineVecs)):
-        if (lineIndex == len(lineVecs)-1):
-            continue
-        xComp = lineNormals[lineIndex][0] + lineNormals[lineIndex+1][0]
-        yComp = lineNormals[lineIndex][1] + lineNormals[lineIndex+1][1]
+        nextLineIndex = (lineIndex+1)%len(lineVecs)
+        xComp = lineNormals[lineIndex][0] + lineNormals[nextLineIndex][0]
+        yComp = lineNormals[lineIndex][1] + lineNormals[nextLineIndex][1]
         intersectionNormal = normalize((xComp, yComp))
         intersectionNormals.append(intersectionNormal)
         # Visualize normal
         if drawVectors:
-            drawVector(points[lineIndex+1], intersectionNormal, [200,250,150])
+            drawVector(points[nextLineIndex], intersectionNormal, [200,250,150])
 
 
     printPoints("intersection normals", intersectionNormals)
@@ -132,8 +130,6 @@ def createPoints():
     westBorderPoints = list()
     eastBorderPoints = list()
     for pIndex in range(len(points)):
-        if (pIndex == len(points)-1):
-            continue
         p = points[pIndex]
         wX = p[0]+(lineNormals[pIndex][0]*halfLineWidth)
         wY = p[1]+(lineNormals[pIndex][1]*halfLineWidth)
@@ -183,9 +179,10 @@ def createPoints():
     eastIntersectionPoints = list()
     westIntersectionPoints = list()
     for i in range(len(intersectionNormals)):
-        eastIntersection = (points[i+1][0] - intersectionNormals[i][0]*halfLineWidth, points[i+1][1] - intersectionNormals[i][1]*halfLineWidth)
+        nextI = (i+1)%len(intersectionNormals)
+        eastIntersection = (points[nextI][0] - intersectionNormals[i][0]*halfLineWidth, points[nextI][1] - intersectionNormals[i][1]*halfLineWidth)
         eastIntersectionPoints.append(eastIntersection)
-        westIntersection = (points[i+1][0] + intersectionNormals[i][0]*halfLineWidth, points[i+1][1] + intersectionNormals[i][1]*halfLineWidth)
+        westIntersection = (points[nextI][0] + intersectionNormals[i][0]*halfLineWidth, points[nextI][1] + intersectionNormals[i][1]*halfLineWidth)
         westIntersectionPoints.append(westIntersection)
     if drawFixedWidthAtIntersectionBorder:
         east_inters_vertex_list = batch.add(len(eastIntersectionPoints), pyglet.gl.GL_LINE_LOOP, None,
