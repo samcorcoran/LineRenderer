@@ -71,6 +71,8 @@ def calcLineIntersection(p1, p2, p3, p4):
     return x, y
 
 def createPoints():
+    groupNum = 0
+
     # Manual points
     points.extend([(100, 400), (200, 500), (300, 400), (350,550), (375,400), (500, 400), (500, 200), (400, 200)])
     printPoints("Initial points", points)
@@ -323,7 +325,9 @@ def createPoints():
             ('c3B/static', [25, 180, 60]*len(eastConstructionLines))
         )
     if drawEastMitrePointLines:
-        east_acute_vertex_list = batch.add(len(eastPoints), pyglet.gl.GL_LINE_LOOP, None,
+        eastMitrePointsGroup = pyglet.graphics.OrderedGroup(groupNum)
+        groupNum += 1
+        east_acute_vertex_list = batch.add(len(eastPoints), pyglet.gl.GL_LINE_LOOP, eastMitrePointsGroup,
             ('v2f/static', list(chain.from_iterable(eastPoints))),
             ('c3B/static', [200, 0, 0]*len(eastPoints))
         )
@@ -333,7 +337,9 @@ def createPoints():
             ('c3B/static', [25, 180, 60]*len(westConstructionLines))
         )
     if drawWestMitrePointLines:
-        west_acute_vertex_list = batch.add(len(westPoints), pyglet.gl.GL_LINE_LOOP, None,
+        westMitrePointsGroup = pyglet.graphics.OrderedGroup(groupNum)
+        groupNum += 1
+        west_acute_vertex_list = batch.add(len(westPoints), pyglet.gl.GL_LINE_LOOP, westMitrePointsGroup,
             ('v2f/static', list(chain.from_iterable(westPoints))),
             ('c3B/static', [0, 0, 200]*len(westPoints))
         )
