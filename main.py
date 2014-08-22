@@ -276,27 +276,13 @@ def createPoints():
             eX2 = points[current][0]-line2Norm[0]
             eY2 = points[current][1]-line2Norm[1]
             # Vector from point after intersection, pointing back into it
-            print("prev: " + str(prev))
-            print("current: " + str(current))
             v2 = (points[prev][0]-points[current][0], points[prev][1]-points[current][1])
-            print(points)
-            print(points[prev][0])
-            print(points[current][0])
-            print(points[prev][1])
-            print(points[current][1])
             # Gives
-            print("Test")
             p1 = (eX1, eY1)
             p2 = (eX1+v1[0], eY1+v1[1])
-            print(p1)
-            print(p2)
-            print(v1)
             # and
             p3 = (eX2, eY2)
             p4 = (eX2+v2[0], eY2+v2[1])
-            print(p3)
-            print(p4)
-            print(v2)
             xInter, yInter = calcLineIntersection(p1, p2, p3, p4)
             eastPoints.append((xInter, yInter))
             eastConstructionLines.extend([p1, p2, p3, p4])
