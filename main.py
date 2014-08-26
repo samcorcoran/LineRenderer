@@ -53,6 +53,13 @@ def drawVector(start, vector, col = [255,255,255], norm=True):
         ('c3B/static', col+col)
     )
 
+def drawLine(start, end, col = [255, 255, 255]):
+    batch.add(2, pyglet.gl.GL_LINES, None,
+        ('v2f/static', [start[0], start[1], end[0], end[1]]),
+        ('c3B/static', col+col)
+    )
+
+
 def calcLineIntersection(p1, p2, p3, p4):
     # First line: Pa = p1 + u1(p2-p1)
     # Second line: Pb = p3 + u2(p4-p3)
