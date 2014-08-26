@@ -39,7 +39,7 @@ def normalize(vec):
 def mag(vec):
     return math.sqrt(vec[0]**2 + vec[1]**2)
 
-def drawVector(start, vector, col = [255,255,255], norm=True):
+def drawVector(start, vector, col = [255,255,255], norm=False):
     v = 0
     if norm:
         v = normalize(vector)
