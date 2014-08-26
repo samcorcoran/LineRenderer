@@ -11,20 +11,24 @@ drawOriginalLines = True
 drawFixedWidthBorder = False
 drawFixedWidthAtIntersectionBorder = False
 drawVectors = False
-drawEastMitrePointLines = True
+drawEastMitrePointLines = False
 drawEastMitreConstructionLines = False
-drawWestMitrePointLines = True
+drawWestMitrePointLines = False
 drawWestMitreConstructionLines = False
+drawMitring = False
+drawRoundedMitring = True
 
 batch = pyglet.graphics.Batch()
 
 xMax = 600
 yMax = 600
 
+numBevelDivisions = 7 #MUST BE ODD
+
 numPoints = 3
 points = list()
 
-lineWidth = 80
+lineWidth = 40
 halfLineWidth = lineWidth/2
 
 def printPoints(listName, pointList):
@@ -206,6 +210,180 @@ def createPoints():
             ('c3B/static', [200, 0, 0]*len(westIntersectionPoints))
         )
 
+    # # Loop over intersections
+    # # On inside of turn, find where entering/exiting lines meet, use point
+    # # On outside of turn...
+    # # * stop at same length of acute line
+    # # * next point is intersection normal, at dist of line width
+    # # * subdivide if desired
+    # eastPoints = list()
+    # eastConstructionLines = list()
+    # westPoints = list()
+    # westConstructionLines = list()
+    # for i in range(len(lineVecs)):
+    #     #print("\ni = %d" % i)
+    #     #print("ith Point: %f,%f" % (points[i][0], points[i][1]))
+    #     prever = i-2
+    #     prev = i-1
+    #     current = i
+    #     v1 = normalize(lineVecs[prever])
+    #     v2 = normalize(lineVecs[prev])
+    #     position = v1[0]*v2[1] - v1[1]*v2[0]
+    #     if (position == 0):
+    #         print("i=%d, straight ahead" % prever)
+    #         # ignore points here... let prev vector dictate them
+    #         continue
+    #     elif (position > 0):
+    #         # Left turn, west border is acute
+    #
+    #         ## Calculate WEST acute points
+    #         line1Norm = (lineNormals[prever][0]*halfLineWidth, lineNormals[prever][1]*halfLineWidth)
+    #         wX1 = points[prever][0] + line1Norm[0]
+    #         wY1 = points[prever][1] + line1Norm[1]
+    #         # Vector from current point, into intersection
+    #         v1 = (points[prev][0]-points[prever][0], points[prev][1]-points[prever][1])
+    #         # Point on line parallel to line leaving intersection point
+    #         line2Norm = (lineNormals[prev][0]*halfLineWidth, lineNormals[prev][1]*halfLineWidth)
+    #         wX2 = points[current][0] + line2Norm[0]
+    #         wY2 = points[current][1] + line2Norm[1]
+    #         # Vector from point after intersection, pointing back into it
+    #         v2 = (points[prev][0]-points[current][0], points[prev][1]-points[current][1])
+    #         # Gives
+    #         p1 = (wX1, wY1)
+    #         p2 = (wX1+v1[0], wY1+v1[1])
+    #         # and
+    #         p3 = (wX2, wY2)
+    #         p4 = (wX2+v2[0], wY2+v2[1])
+    #         xInter, yInter = calcLineIntersection(p1, p2, p3, p4)
+    #         westPoints.append((xInter, yInter))
+    #         westConstructionLines.extend([p1, p2, p3, p4])
+    #
+    #         ## Calculate EAST obtuse points
+    #         # Uses point i+1 (i.e. prev) as this process is working out the termination points for the end of the prev vector
+    #         eX1 = points[prever][0] - line1Norm[0]
+    #         eY1 = points[prever][1] - line1Norm[1]
+    #         #drawVector(points[prev], line1Norm)
+    #         eX2 = points[current][0] - line2Norm[0]
+    #         eY2 = points[current][1] - line2Norm[1]
+    #         #drawVector(points[current], line2Norm, (50, 50, 50))
+    #         # Gives
+    #         p1 = (eX1, eY1)
+    #         p2 = (eX1+v1[0], eY1+v1[1])
+    #         # and
+    #         p3 = (eX2, eY2)
+    #         p4 = (eX2+v2[0], eY2+v2[1])
+    #         xInter, yInter = calcLineIntersection(p1, p2, p3, p4)
+    #         eastPoints.append((xInter, yInter))
+    #         eastConstructionLines.extend([p1, p2])
+    #     else:
+    #         # Right turn, east border is acute
+    #
+    #         ## Calculate EAST acute points
+    #         # Inverted normal to get normal on east side
+    #         line1Norm = (lineNormals[prever][0]*halfLineWidth, lineNormals[prever][1]*halfLineWidth)
+    #         eX1 = points[prever][0]-line1Norm[0]
+    #         eY1 = points[prever][1]-line1Norm[1]
+    #         # Vector from current point, into intersection
+    #         v1 = (points[prev][0]-points[prever][0], points[prev][1]-points[prever][1])
+    #         # Point on line parallel to line leaving intersection point
+    #         line2Norm = (lineNormals[prev][0]*halfLineWidth, lineNormals[prev][1]*halfLineWidth)
+    #         eX2 = points[current][0]-line2Norm[0]
+    #         eY2 = points[current][1]-line2Norm[1]
+    #         # Vector from point after intersection, pointing back into it
+    #         v2 = (points[prev][0]-points[current][0], points[prev][1]-points[current][1])
+    #         # Gives
+    #         p1 = (eX1, eY1)
+    #         p2 = (eX1+v1[0], eY1+v1[1])
+    #         # and
+    #         p3 = (eX2, eY2)
+    #         p4 = (eX2+v2[0], eY2+v2[1])
+    #         xInter, yInter = calcLineIntersection(p1, p2, p3, p4)
+    #         eastPoints.append((xInter, yInter))
+    #         eastConstructionLines.extend([p1, p2, p3, p4])
+    #
+    #         ## Calculate WEST obtuse points
+    #         # Uses point i+1 (i.e. prev) as this process is working out the termination points for the end of the prev vector
+    #         wX1 = points[prever][0] + line1Norm[0]
+    #         wY1 = points[prever][1] + line1Norm[1]
+    #         #drawVector(points[prev], line1Norm)
+    #         wX2 = points[current][0] + line2Norm[0]
+    #         wY2 = points[current][1] + line2Norm[1]
+    #         #drawVector(points[current], line2Norm, (50, 50, 50))
+    #         # Gives
+    #         p1 = (wX1, wY1)
+    #         p2 = (wX1+v1[0], wY1+v1[1])
+    #         # and
+    #         p3 = (wX2, wY2)
+    #         p4 = (wX2+v2[0], wY2+v2[1])
+    #         xInter, yInter = calcLineIntersection(p1, p2, p3, p4)
+    #         westPoints.append((xInter, yInter))
+    #         westConstructionLines.extend([p1, p2])
+    #
+    # if drawEastMitreConstructionLines:
+    #     east_acute_construction_vertex_list = batch.add(len(eastConstructionLines), pyglet.gl.GL_LINES, None,
+    #         ('v2f/static', list(chain.from_iterable(eastConstructionLines))),
+    #         ('c3B/static', [25, 180, 60]*len(eastConstructionLines))
+    #     )
+    # if drawEastMitrePointLines:
+    #     eastMitrePointsGroup = pyglet.graphics.OrderedGroup(groupNum)
+    #     groupNum += 1
+    #     east_acute_vertex_list = batch.add(len(eastPoints), pyglet.gl.GL_LINE_LOOP, eastMitrePointsGroup,
+    #         ('v2f/static', list(chain.from_iterable(eastPoints))),
+    #         ('c3B/static', [200, 0, 0]*len(eastPoints))
+    #     )
+    # if drawWestMitreConstructionLines:
+    #     west_acute_construction_vertex_list = batch.add(len(westConstructionLines), pyglet.gl.GL_LINES, None,
+    #         ('v2f/static', list(chain.from_iterable(westConstructionLines))),
+    #         ('c3B/static', [25, 180, 60]*len(westConstructionLines))
+    #     )
+    # if drawWestMitrePointLines:
+    #     westMitrePointsGroup = pyglet.graphics.OrderedGroup(groupNum)
+    #     groupNum += 1
+    #     west_acute_vertex_list = batch.add(len(westPoints), pyglet.gl.GL_LINE_LOOP, westMitrePointsGroup,
+    #         ('v2f/static', list(chain.from_iterable(westPoints))),
+    #         ('c3B/static', [0, 0, 200]*len(westPoints))
+    #     )
+    #
+    # if drawMitring:
+    #     # Construct wide-line triangles
+    #     # West triangles
+    #     westTrianglePoints = list()
+    #     for pIndex in range(len(points)):
+    #         westTrianglePoints.append(points[pIndex-1])
+    #         westTrianglePoints.append(westPoints[pIndex])
+    #     westTrianglePoints.append(points[-1])
+    #     westTrianglePoints.append(westPoints[0])
+    #     westPointsGroup = pyglet.graphics.OrderedGroup(groupNum)
+    #     groupNum += 1
+    #     col = list()
+    #     for n in range(len(westTrianglePoints)):
+    #         col.extend([random.randint(0,255), random.randint(0,255), random.randint(0,255)])
+    #     west_acute_vertex_list = batch.add(len(westTrianglePoints), pyglet.gl.GL_TRIANGLE_STRIP, westPointsGroup,
+    #         ('v2f/static', list(chain.from_iterable(westTrianglePoints))),
+    #         ('c3B/static', col)
+    #     )
+    #     # East triangles
+    #     eastTrianglePoints = list()
+    #     for pIndex in range(len(points)):
+    #         eastTrianglePoints.append(points[pIndex-1])
+    #         eastTrianglePoints.append(eastPoints[pIndex])
+    #     eastTrianglePoints.append(points[-1])
+    #     eastTrianglePoints.append(eastPoints[0])
+    #     eastPointsGroup = pyglet.graphics.OrderedGroup(groupNum)
+    #     groupNum += 1
+    #     col = list()
+    #     for n in range(len(eastTrianglePoints)):
+    #         col.extend([random.randint(0,255), random.randint(0,255), random.randint(0,255)])
+    #     east_acute_vertex_list = batch.add(len(eastTrianglePoints), pyglet.gl.GL_TRIANGLE_STRIP, eastPointsGroup,
+    #         ('v2f/static', list(chain.from_iterable(eastTrianglePoints))),
+    #         ('c3B/static', col)
+    #     )
+
+
+
+
+
+    ## ROUNDED OBTUSE CORNERS
     # Loop over intersections
     # On inside of turn, find where entering/exiting lines meet, use point
     # On outside of turn...
@@ -255,6 +433,8 @@ def createPoints():
             westConstructionLines.extend([p1, p2, p3, p4])
 
             ## Calculate EAST obtuse points
+            # Outer corner fans out from point on line
+            fanCentre = points[prev]
             # Uses point i+1 (i.e. prev) as this process is working out the termination points for the end of the prev vector
             eX1 = points[prever][0] - line1Norm[0]
             eY1 = points[prever][1] - line1Norm[1]
@@ -263,14 +443,52 @@ def createPoints():
             eY2 = points[current][1] - line2Norm[1]
             #drawVector(points[current], line2Norm, (50, 50, 50))
             # Gives
-            p1 = (eX1, eY1)
+            #p1 = (eX1, eY1)
             p2 = (eX1+v1[0], eY1+v1[1])
             # and
-            p3 = (eX2, eY2)
+            #p3 = (eX2, eY2)
             p4 = (eX2+v2[0], eY2+v2[1])
-            xInter, yInter = calcLineIntersection(p1, p2, p3, p4)
-            eastPoints.append((xInter, yInter))
-            eastConstructionLines.extend([p1, p2])
+            # 'Cap' is straight line from p2 to p4
+            capVec = (p4[0]-p2[0], p4[1]-p2[1])
+
+            # DRAWS BLUE TO ENTRY
+            #drawLine(fanCentre, p2, (0,0,200))
+            # DRAWS WHITE TO EXIT
+            #drawLine(fanCentre, p4)
+            # DRAWS BROWN CAP
+            #drawVector(p2, capVec, (120,80,50))
+
+            capDist = mag(capVec)
+            capNorm = normalize(capVec)
+            divGap = capDist / (numBevelDivisions+1)
+            currentDiv = divGap
+            #eastPoints.append(p2)
+
+            # Temporary increasing colour for diagnosis
+            colourIncrease = int(255/(numBevelDivisions+2))
+
+            # The +2 is to include the start and end points too
+            for dIndex in range(numBevelDivisions+2):
+                t = (1/(numBevelDivisions+1))*dIndex
+                vX = (p2[0]+capVec[0]*t)-fanCentre[0]
+                vY = (p2[1]+capVec[1]*t)-fanCentre[1]
+                # Vector reaches straight line chord, but must be halfLineWidth long
+                normalizedRadius = normalize((vX, vY))
+                x = fanCentre[0] + normalizedRadius[0]*halfLineWidth
+                y = fanCentre[1] + normalizedRadius[1]*halfLineWidth
+
+                # Draw diagnostic line for fan radii
+                #print("Radius %d, increasing colour: %d" % (dIndex, colourIncrease))
+                drawLine(fanCentre, (x, y), [0, colourIncrease*(dIndex+1), 0])
+
+                currentDiv += divGap
+                eastPoints.append((x, y))
+                # Append fan centre
+                if dIndex%2 == 0 and dIndex != numBevelDivisions:
+                    eastPoints.append(points[prev])
+            #eastPoints.append(p4)
+
+            #eastConstructionLines.extend([p1, p2])
         else:
             # Right turn, east border is acute
 
@@ -295,6 +513,15 @@ def createPoints():
             p4 = (eX2+v2[0], eY2+v2[1])
             xInter, yInter = calcLineIntersection(p1, p2, p3, p4)
             eastPoints.append((xInter, yInter))
+            # Append point on entering line
+            eastPoints.append((xInter+line1Norm[0], yInter+line1Norm[1]))
+            eastPoints.append(points[prev])
+            # Append a second time to create degenerate triangle
+            eastPoints.append(points[prev])
+            # Append intersection again
+            eastPoints.append((xInter, yInter))
+            # Append point on exiting line
+            eastPoints.append((xInter+line2Norm[0], yInter+line2Norm[1]))
             eastConstructionLines.extend([p1, p2, p3, p4])
 
             ## Calculate WEST obtuse points
@@ -314,6 +541,7 @@ def createPoints():
             xInter, yInter = calcLineIntersection(p1, p2, p3, p4)
             westPoints.append((xInter, yInter))
             westConstructionLines.extend([p1, p2])
+            pass
 
     if drawEastMitreConstructionLines:
         east_acute_construction_vertex_list = batch.add(len(eastConstructionLines), pyglet.gl.GL_LINES, None,
@@ -340,39 +568,43 @@ def createPoints():
             ('c3B/static', [0, 0, 200]*len(westPoints))
         )
 
-    # Construct wide-line triangles
-    # West triangles
-    westTrianglePoints = list()
-    for pIndex in range(len(points)):
-        westTrianglePoints.append(points[pIndex-1])
-        westTrianglePoints.append(westPoints[pIndex])
-    westTrianglePoints.append(points[-1])
-    westTrianglePoints.append(westPoints[0])
-    westPointsGroup = pyglet.graphics.OrderedGroup(groupNum)
-    groupNum += 1
-    col = list()
-    for n in range(len(westTrianglePoints)):
-        col.extend([random.randint(0,255), random.randint(0,255), random.randint(0,255)])
-    west_acute_vertex_list = batch.add(len(westTrianglePoints), pyglet.gl.GL_TRIANGLE_STRIP, westPointsGroup,
-        ('v2f/static', list(chain.from_iterable(westTrianglePoints))),
-        ('c3B/static', col)
-    )
-    # East triangles
-    eastTrianglePoints = list()
-    for pIndex in range(len(points)):
-        eastTrianglePoints.append(points[pIndex-1])
-        eastTrianglePoints.append(eastPoints[pIndex])
-    eastTrianglePoints.append(points[-1])
-    eastTrianglePoints.append(eastPoints[0])
-    eastPointsGroup = pyglet.graphics.OrderedGroup(groupNum)
-    groupNum += 1
-    col = list()
-    for n in range(len(eastTrianglePoints)):
-        col.extend([random.randint(0,255), random.randint(0,255), random.randint(0,255)])
-    east_acute_vertex_list = batch.add(len(eastTrianglePoints), pyglet.gl.GL_TRIANGLE_STRIP, eastPointsGroup,
-        ('v2f/static', list(chain.from_iterable(eastTrianglePoints))),
-        ('c3B/static', col)
-    )
+    if drawRoundedMitring:
+        #Construct wide-line triangles
+        # # West triangles
+        # westTrianglePoints = list()
+        # for pIndex in range(len(points)):
+        #     westTrianglePoints.append(points[pIndex-1])
+        #     westTrianglePoints.append(westPoints[pIndex])
+        # westTrianglePoints.append(points[-1])
+        # westTrianglePoints.append(westPoints[0])
+        # westPointsGroup = pyglet.graphics.OrderedGroup(groupNum)
+        # groupNum += 1
+        # col = list()
+        # for n in range(len(westTrianglePoints)):
+        #     col.extend([random.randint(0,255), random.randint(0,255), random.randint(0,255)])
+        # west_acute_vertex_list = batch.add(len(westTrianglePoints), pyglet.gl.GL_TRIANGLE_STRIP, westPointsGroup,
+        #     ('v2f/static', list(chain.from_iterable(westTrianglePoints))),
+        #     ('c3B/static', col)
+        # )
+        #East triangles
+        eastTrianglePoints = list()
+        for pIndex in range(len(eastPoints)):
+            #eastTrianglePoints.append(points[pIndex-1])
+            eastTrianglePoints.append(eastPoints[pIndex])
+        eastTrianglePoints.append(eastPoints[0])
+        eastTrianglePoints.append(eastPoints[1])
+
+        eastPointsGroup = pyglet.graphics.OrderedGroup(groupNum)
+        groupNum += 1
+        col = list()
+        for n in range(len(eastTrianglePoints)):
+            #col.extend([random.randint(0,255), random.randint(0,255), random.randint(0,255)])
+            col.extend([200,0,0])
+        east_acute_vertex_list = batch.add(len(eastTrianglePoints), pyglet.gl.GL_TRIANGLE_STRIP, eastPointsGroup,
+            ('v2f/static', list(chain.from_iterable(eastTrianglePoints))),
+            ('c3B/static', col)
+        )
+        pass
 
 class GameWindow(pyglet.window.Window):
     def __init__(self, *args, **kwargs):
