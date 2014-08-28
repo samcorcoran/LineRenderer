@@ -2,6 +2,7 @@ from pyglet.gl import *
 import random
 import math
 from itertools import chain
+import numpy as np
 
 glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 glEnable(GL_BLEND)
@@ -37,8 +38,15 @@ def printPoints(listName, pointList):
         print(p)
 
 def normalize(vec):
+    print("NORMALIZING VEC:")
+    print(vec)
+    print(vec[0])
+    print(vec[1])
     magnitude = math.sqrt(vec[0]**2 + vec[1]**2)
-    return (vec[0]/magnitude, vec[1]/magnitude)
+    return np.array([vec[0]/magnitude, vec[1]/magnitude])
+
+def perpendicular(vec):
+    return np.array([-vec[1], vec[0]])
 
 def mag(vec):
     return math.sqrt(vec[0]**2 + vec[1]**2)
@@ -84,11 +92,34 @@ def calcLineIntersection(p1, p2, p3, p4):
     # This link was very helpful: http://paulbourke.net/geometry/pointlineplane/
     return x, y
 
+def scaleVector(vec, length):
+    normVec = normalize(vec)
+    return (normVec[0]*length, normVec[1]*length)
+
+def calcParallelLinePoints(p1, p2, p3, eastSide):
+   sign = 1 if eastSide else -1
+   # Vector entering p2 from p1
+   v1 = p2 - p1
+   print("v1, normal")
+   print(v1)
+   # Perpendicular vector on east/west side
+   v1Normal = normalize(v1*sign) * halfLineWidth
+   print(v1Normal)
+   # Vector entering p2 from p3
+   v2 = p2 - p3
+   # Perpendicular vector on east/west side
+   v2Normal = normalize(v2*sign) * halfLineWidth
+   a1 = p1 + v1Normal
+   a2 = a1 + v1
+   b1 = p2 + v2Normal
+   b2 = b1 + v2
+   return a1, a2, b1, b2
+
 def createPoints():
     groupNum = 1
 
     # Manual points
-    points.extend([(100, 400), (200, 500), (300, 400), (350,550), (375,400), (500, 400), (500, 200), (400, 200)])
+    points.extend([np.array([100, 400]), np.array([200, 500]), np.array([300, 400]), np.array([350,550]), np.array([375,400]), np.array([500, 400]), np.array([500, 200]), np.array([400, 200])])
     printPoints("Initial points", points)
     pointCols = [255, 0, 0] * len(points)
     if drawOriginalPoints:
@@ -112,10 +143,13 @@ def createPoints():
     for pIndex in range(len(points)):
         #print("pIndex: ", pIndex)
         nextPIndex = (pIndex+1)%len(points)
-        vec = (points[nextPIndex][0] - points[pIndex][0], points[nextPIndex][1] - points[pIndex][1])
+        vec = points[nextPIndex] - points[pIndex]
         lineVecs.append(vec)
-        normalVec = (-vec[1], vec[0])
-        unitNormalVec = normalize(normalVec)
+        print("Line vec")
+        print(vec)
+        unitNormalVec = normalize(perpendicular(vec))
+        print("Unit normal vec:")
+        print(unitNormalVec)
         lineNormals.append(unitNormalVec)
         # Visualize normal
         midpoint = (
@@ -131,9 +165,10 @@ def createPoints():
     # Calc intersection normals
     for lineIndex in range(len(lineVecs)):
         nextLineIndex = (lineIndex+1)%len(lineVecs)
-        xComp = lineNormals[lineIndex][0] + lineNormals[nextLineIndex][0]
-        yComp = lineNormals[lineIndex][1] + lineNormals[nextLineIndex][1]
-        intersectionNormal = normalize((xComp, yComp))
+        print("LINE NORMALS")
+        print(lineNormals[lineIndex])
+        print(lineNormals[nextLineIndex])
+        intersectionNormal = normalize(lineNormals[lineIndex] + lineNormals[nextLineIndex])
         intersectionNormals.append(intersectionNormal)
         # Visualize normal
         if drawVectors:
@@ -410,24 +445,26 @@ def createPoints():
         elif (position > 0):
             # Left turn, west border is acute
 
+            p1, p2, p3, p4 = calcParallelLinePoints(points[prever], points[prev], points[current], eastSide=True)
+
             ## Calculate WEST acute points
-            line1Norm = (lineNormals[prever][0]*halfLineWidth, lineNormals[prever][1]*halfLineWidth)
-            wX1 = points[prever][0] + line1Norm[0]
-            wY1 = points[prever][1] + line1Norm[1]
-            # Vector from current point, into intersection
-            v1 = (points[prev][0]-points[prever][0], points[prev][1]-points[prever][1])
-            # Point on line parallel to line leaving intersection point
-            line2Norm = (lineNormals[prev][0]*halfLineWidth, lineNormals[prev][1]*halfLineWidth)
-            wX2 = points[current][0] + line2Norm[0]
-            wY2 = points[current][1] + line2Norm[1]
-            # Vector from point after intersection, pointing back into it
-            v2 = (points[prev][0]-points[current][0], points[prev][1]-points[current][1])
-            # Gives
-            p1 = (wX1, wY1)
-            p2 = (wX1+v1[0], wY1+v1[1])
-            # and
-            p3 = (wX2, wY2)
-            p4 = (wX2+v2[0], wY2+v2[1])
+            # line1Norm = (lineNormals[prever][0]*halfLineWidth, lineNormals[prever][1]*halfLineWidth)
+            # wX1 = points[prever][0] + line1Norm[0]
+            # wY1 = points[prever][1] + line1Norm[1]
+            # # Vector from current point, into intersection
+            # v1 = (points[prev][0]-points[prever][0], points[prev][1]-points[prever][1])
+            # # Point on line parallel to line leaving intersection point
+            # line2Norm = (lineNormals[prev][0]*halfLineWidth, lineNormals[prev][1]*halfLineWidth)
+            # wX2 = points[current][0] + line2Norm[0]
+            # wY2 = points[current][1] + line2Norm[1]
+            # # Vector from point after intersection, pointing back into it
+            # v2 = (points[prev][0]-points[current][0], points[prev][1]-points[current][1])
+            # # Gives
+            # p1 = (wX1, wY1)
+            # p2 = (wX1+v1[0], wY1+v1[1])
+            # # and
+            # p3 = (wX2, wY2)
+            # p4 = (wX2+v2[0], wY2+v2[1])
             xInter, yInter = calcLineIntersection(p1, p2, p3, p4)
             westPoints.append((xInter, yInter))
             westConstructionLines.extend([p1, p2, p3, p4])
