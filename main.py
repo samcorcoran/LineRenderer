@@ -343,14 +343,6 @@ def drawMitringTriangles():
 def createPoints():
     groupNum = 1
 
-
-
-
-
-
-
-
-
     ## ROUNDED OBTUSE CORNERS
     # Loop over intersections
     # On inside of turn, find where entering/exiting lines meet, use point
