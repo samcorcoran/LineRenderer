@@ -413,10 +413,10 @@ def createPoints():
             eY2 = points[current][1] - line2Norm[1]
             #drawVector(batch, points[current], line2Norm, (50, 50, 50))
             # Gives
-            #p1 = (eX1, eY1)
+            p1 = (eX1, eY1) # Not required for calculation
             p2 = (eX1+v1[0], eY1+v1[1])
             # and
-            #p3 = (eX2, eY2)
+            p3 = (eX2, eY2) # Not required for calculation
             p4 = (eX2+v2[0], eY2+v2[1])
             # 'Cap' is straight line from p2 to p4
             capVec = (p4[0]-p2[0], p4[1]-p2[1])
