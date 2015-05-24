@@ -14,8 +14,8 @@ drawEastMitrePointLines = False
 drawEastMitreConstructionLines = False
 drawWestMitrePointLines = False
 drawWestMitreConstructionLines = False
-drawMitring = False
-drawRoundedMitring = True
+drawMitring = False # Only takes effect if drawEastMitrePointLines is also true
+drawRoundedMitring = False # Draws thick triangle strip and rounds corners
 
 # Set up the rendergroup generator
 renderGroupGenerator = utils.generateRenderGroup()
