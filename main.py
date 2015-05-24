@@ -87,8 +87,7 @@ def drawSegmentNormals():
             (points[pIndex][0] + points[nextPIndex][0])/2,
             (points[pIndex][1] + points[nextPIndex][1])/2
         )
-        if drawVectors:
-            utils.drawVector(batch, midpoint, lineNormals[pIndex], [120,222,240])
+        utils.drawVector(batch, midpoint, lineNormals[pIndex], [120,222,240])
 
 def calculateFixedWidthBorderPoints():
     # Calc points for line width border
@@ -548,7 +547,10 @@ if __name__ == '__main__':
     if drawOriginalLines:
         drawInitialLines()
 
-    drawSegmentNormals()
+    # For each line-segment connecting pairs of original/initial points, a small white line is drawn
+    #  to indicate the normal for that segment.
+    if drawVectors:
+        drawSegmentNormals()
 
     # Fixed width border draws straight lines on both sides of the original sequence of points
     #  at a fixed width from it. This acts as a guide to show roughly where the 'thick line' would
