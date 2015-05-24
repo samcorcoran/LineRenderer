@@ -51,7 +51,7 @@ def createInitialPoints():
     points.extend([np.array([100, 400]), np.array([200, 500]), np.array([300, 400]), np.array([350,550]), np.array([375,400]), np.array([500, 400]), np.array([500, 200]), np.array([400, 200])])
     utils.printPoints("Initial points", points)
 
-def drawInitialPoints(points):
+def drawInitialPoints():
     pointCols = [255, 0, 0] * len(points)
     global renderGroupGenerator
     points_vertex_list = batch.add(len(points), pyglet.gl.GL_POINTS, next(renderGroupGenerator),
