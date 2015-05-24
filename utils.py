@@ -79,3 +79,11 @@ def calcParallelLinePoints(offset, p1, p2, p3, eastSide):
    b1 = p2 + v2Normal
    b2 = b1 + v2
    return a1, a2, b1, b2
+
+# Creates render groups with a new id so sets of verts don't get drawn as
+#  continuing on from previous set
+def generateRenderGroup():
+    groupCount = 0
+    while True:
+        groupCount += 1
+        yield pyglet.graphics.OrderedGroup(groupCount)
