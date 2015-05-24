@@ -439,9 +439,10 @@ def createPoints():
 
             # The +2 is to include the start and end points too
             for dIndex in range(numBevelDivisions+2):
-                t = (1/(numBevelDivisions+1))*dIndex
-                vX = (p2[0]+capVec[0]*t)-fanCentre[0]
-                vY = (p2[1]+capVec[1]*t)-fanCentre[1]
+                # t is one minus the increment so triangle fan starts at correct end
+                t = 1 - (1/(numBevelDivisions+1))*dIndex
+                vX = fanCentre[0] - (p2[0]+capVec[0]*t)
+                vY = fanCentre[1] - (p2[1]+capVec[1]*t)
                 # Vector reaches straight line chord, but must be halfLineWidth long
                 normalizedRadius = utils.normalize((vX, vY))
                 x = fanCentre[0] + normalizedRadius[0]*halfLineWidth
