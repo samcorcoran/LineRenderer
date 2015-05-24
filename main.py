@@ -30,7 +30,6 @@ numPoints = 3
 points = list()
 lineVecs = list()
 lineNormals = list()
-intersectionNormals = list()
 
 westBorderPoints = list()
 eastBorderPoints = list()
@@ -95,25 +94,6 @@ def drawSegmentNormals():
         if drawVectors:
             utils.drawVector(batch, midpoint, lineNormals[pIndex], [120,222,240])
 
-def calculateIntersectionNormals():
-    # Calc intersection normals
-    for lineIndex in range(len(lineVecs)):
-        nextLineIndex = (lineIndex+1)%len(lineVecs)
-        print("LINE NORMALS")
-        print(lineNormals[lineIndex])
-        print(lineNormals[nextLineIndex])
-        intersectionNormal = utils.normalize(lineNormals[lineIndex] + lineNormals[nextLineIndex])
-        intersectionNormals.append(intersectionNormal)
-        utils.drawVector(batch, points[nextLineIndex], intersectionNormal*10)
-
-def drawIntersectionNormals():
-    for lineIndex in range(len(lineVecs)):
-        nextLineIndex = (lineIndex+1)%len(lineVecs)
-        # Visualize normal
-        if drawVectors:
-            utils.drawVector(batch, points[nextLineIndex], intersectionNormals[lineIndex], [200,250,150])
-    utils.printPoints("intersection normals", intersectionNormals)
-
 def calculateFixedWidthBorderPoints():
     # Calc points for line width border
     for pIndex in range(len(points)):
@@ -147,15 +127,6 @@ def drawFixedWidthBorder():
             ('v2f/static', list(chain.from_iterable(eastBorderPoints))),
             ('c3B/static', [0, 0, 255, 100, 50, 255]*int(len(eastBorderPoints)/2))
         )
-
-def calculateEastIntersectionPoints():
-    # Calculate intersection points for east line segments (and then west) using normal offsets from corners
-    for i in range(len(intersectionNormals)):
-        nextI = (i+1)%len(intersectionNormals)
-        eastIntersection = (points[nextI][0] - intersectionNormals[i][0]*halfLineWidth, points[nextI][1] - intersectionNormals[i][1]*halfLineWidth)
-        eastIntersectionPoints.append(eastIntersection)
-        westIntersection = (points[nextI][0] + intersectionNormals[i][0]*halfLineWidth, points[nextI][1] + intersectionNormals[i][1]*halfLineWidth)
-        westIntersectionPoints.append(westIntersection)
 
 def drawFixedWidthAtIntersectionBorder():
     if drawFixedWidthAtIntersectionBorder:
@@ -589,7 +560,6 @@ if __name__ == '__main__':
         drawInitialLines()
 
     drawSegmentNormals()
-    drawIntersectionNormals()
     drawFixedWidthBorder()
 
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
