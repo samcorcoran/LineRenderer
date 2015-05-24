@@ -5,17 +5,17 @@ from itertools import chain
 import numpy as np
 import utils
 
-drawOriginalPoints = False
-drawOriginalLines = False
-drawFixedWidthBorder = False
+drawOriginalPoints = True
+drawOriginalLines = True
+fixedWidthBordersEnabled = False
 drawFixedWidthAtIntersectionBorder = False
 drawVectors = False
 drawEastMitrePointLines = False
 drawEastMitreConstructionLines = False
 drawWestMitrePointLines = False
 drawWestMitreConstructionLines = False
-drawMitring = False # Only takes effect if drawEastMitrePointLines is also true
-drawRoundedMitring = False # Draws thick triangle strip and rounds corners
+drawMitring = True # Only takes effect if drawEastMitrePointLines is also true
+drawRoundedMitring = True # Draws thick triangle strip and rounds corners
 
 batch = pyglet.graphics.Batch()
 
@@ -556,7 +556,7 @@ if __name__ == '__main__':
     # Fixed width border draws straight lines on both sides of the original sequence of points
     #  at a fixed width from it. This acts as a guide to show roughly where the 'thick line' would
     #  be drawn. These are just aides though.
-    if drawFixedWidthBorder:
+    if fixedWidthBordersEnabled:
         drawFixedWidthBorder()
 
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
