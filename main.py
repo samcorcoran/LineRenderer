@@ -53,13 +53,12 @@ def createInitialPoints():
     points.extend([np.array([100, 400]), np.array([200, 500]), np.array([300, 400]), np.array([350,550]), np.array([375,400]), np.array([500, 400]), np.array([500, 200]), np.array([400, 200])])
     utils.printPoints("Initial points", points)
 
-def drawInitialPoints():
+def drawInitialPoints(points):
     pointCols = [255, 0, 0] * len(points)
-    if drawOriginalPoints:
-        points_vertex_list = batch.add(len(points), pyglet.gl.GL_POINTS, None,
-            ('v2f/static', list(chain.from_iterable(points))),
-            ('c3B/static', pointCols)
-        )
+    points_vertex_list = batch.add(len(points), pyglet.gl.GL_POINTS, None,
+        ('v2f/static', list(chain.from_iterable(points))),
+        ('c3B/static', pointCols)
+    )
 
 def drawInitialLines():
     if drawOriginalLines:
@@ -594,7 +593,8 @@ if __name__ == '__main__':
     createPoints()
     calculateMitringPoints()
 
-    drawInitialPoints()
+    if drawOriginalPoints:
+        drawInitialPoints()
     drawSegmentNormals()
     drawIntersectionNormals()
     drawFixedWidthBorder()
