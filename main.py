@@ -22,7 +22,7 @@ batch = pyglet.graphics.Batch()
 xMax = 600
 yMax = 600
 
-numBevelDivisions = 3 #MUST BE ODD
+numBevelDivisions = 1 #MUST BE ODD
 
 #
 groupNum = 1
