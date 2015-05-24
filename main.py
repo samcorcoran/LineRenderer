@@ -17,8 +17,6 @@ drawWestMitreConstructionLines = False
 drawMitring = False # Only takes effect if drawEastMitrePointLines is also true
 drawRoundedMitring = False # Draws thick triangle strip and rounds corners
 
-# Set up the rendergroup generator
-renderGroupGenerator = utils.generateRenderGroup()
 batch = pyglet.graphics.Batch()
 
 xMax = 600
@@ -53,14 +51,14 @@ def createInitialPoints():
 
 def drawInitialPoints():
     pointCols = [255, 0, 0] * len(points)
-    points_vertex_list = batch.add(len(points), pyglet.gl.GL_POINTS, next(renderGroupGenerator),
+    points_vertex_list = batch.add(len(points), pyglet.gl.GL_POINTS, next(utils.renderGroupGenerator),
         ('v2f/static', list(chain.from_iterable(points))),
         ('c3B/static', pointCols)
     )
 
 def drawInitialLines():
     lineSegmentCols = [255, 255, 0] * (len(points))
-    line_segments_vertex_list = batch.add(len(points), pyglet.gl.GL_LINE_LOOP, next(renderGroupGenerator),
+    line_segments_vertex_list = batch.add(len(points), pyglet.gl.GL_LINE_LOOP, next(utils.renderGroupGenerator),
         ('v2f/static', list(chain.from_iterable(points))),
         ('c3B/static', lineSegmentCols)
     )
@@ -108,19 +106,19 @@ def calculateFixedWidthBorderPoints():
 
 def drawFixedWidthBorder():
     if drawFixedWidthBorder:
-        west_vertex_list = batch.add(len(westBorderPoints), pyglet.gl.GL_POINTS, next(renderGroupGenerator),
+        west_vertex_list = batch.add(len(westBorderPoints), pyglet.gl.GL_POINTS, next(utils.renderGroupGenerator),
             ('v2f/static', list(chain.from_iterable(westBorderPoints))),
             ('c3B/static', [0, 255, 0, 100, 255, 50]*int(len(westBorderPoints)/2))
         )
-        east_vertex_list = batch.add(len(eastBorderPoints), pyglet.gl.GL_POINTS, next(renderGroupGenerator),
+        east_vertex_list = batch.add(len(eastBorderPoints), pyglet.gl.GL_POINTS, next(utils.renderGroupGenerator),
             ('v2f/static', list(chain.from_iterable(eastBorderPoints))),
             ('c3B/static', [0, 0, 255, 100, 50, 255]*int(len(eastBorderPoints)/2))
         )
-        west_line_vertex_list = batch.add(len(westBorderPoints), pyglet.gl.GL_LINE_LOOP, next(renderGroupGenerator),
+        west_line_vertex_list = batch.add(len(westBorderPoints), pyglet.gl.GL_LINE_LOOP, next(utils.renderGroupGenerator),
             ('v2f/static', list(chain.from_iterable(westBorderPoints))),
             ('c3B/static', [0, 255, 0, 100, 255, 50]*int(len(westBorderPoints)/2))
         )
-        east_line_vertex_list = batch.add(len(eastBorderPoints), pyglet.gl.GL_LINE_LOOP, next(renderGroupGenerator),
+        east_line_vertex_list = batch.add(len(eastBorderPoints), pyglet.gl.GL_LINE_LOOP, next(utils.renderGroupGenerator),
             ('v2f/static', list(chain.from_iterable(eastBorderPoints))),
             ('c3B/static', [0, 0, 255, 100, 50, 255]*int(len(eastBorderPoints)/2))
         )
@@ -244,25 +242,25 @@ def calculateMitringPoints():
 
 def drawMitreConstructionLines():
     if drawEastMitreConstructionLines:
-        east_acute_construction_vertex_list = batch.add(len(eastConstructionLines), pyglet.gl.GL_LINES, next(renderGroupGenerator),
+        east_acute_construction_vertex_list = batch.add(len(eastConstructionLines), pyglet.gl.GL_LINES, next(utils.renderGroupGenerator),
             ('v2f/static', list(chain.from_iterable(eastConstructionLines))),
             ('c3B/static', [25, 180, 60]*len(eastConstructionLines))
         )
     if drawWestMitreConstructionLines:
-        west_acute_construction_vertex_list = batch.add(len(westConstructionLines), pyglet.gl.GL_LINES, next(renderGroupGenerator),
+        west_acute_construction_vertex_list = batch.add(len(westConstructionLines), pyglet.gl.GL_LINES, next(utils.renderGroupGenerator),
             ('v2f/static', list(chain.from_iterable(westConstructionLines))),
             ('c3B/static', [25, 180, 60]*len(westConstructionLines))
         )
 
 def drawMitreLines():
     if drawEastMitrePointLines:
-        east_acute_vertex_list = batch.add(len(eastPoints), pyglet.gl.GL_LINE_LOOP, next(renderGroupGenerator),
+        east_acute_vertex_list = batch.add(len(eastPoints), pyglet.gl.GL_LINE_LOOP, next(utils.renderGroupGenerator),
             ('v2f/static', list(chain.from_iterable(eastPoints))),
             ('c3B/static', [200, 0, 0]*len(eastPoints))
         )
 
     if drawWestMitrePointLines:
-        west_acute_vertex_list = batch.add(len(westPoints), pyglet.gl.GL_LINE_LOOP, next(renderGroupGenerator),
+        west_acute_vertex_list = batch.add(len(westPoints), pyglet.gl.GL_LINE_LOOP, next(utils.renderGroupGenerator),
             ('v2f/static', list(chain.from_iterable(westPoints))),
             ('c3B/static', [0, 0, 200]*len(westPoints))
         )
@@ -280,7 +278,7 @@ def drawMitringTriangles():
         col = list()
         for n in range(len(westTrianglePoints)):
             col.extend([random.randint(0,255), random.randint(0,255), random.randint(0,255)])
-        west_acute_vertex_list = batch.add(len(westTrianglePoints), pyglet.gl.GL_TRIANGLE_STRIP, next(renderGroupGenerator),
+        west_acute_vertex_list = batch.add(len(westTrianglePoints), pyglet.gl.GL_TRIANGLE_STRIP, next(utils.renderGroupGenerator),
             ('v2f/static', list(chain.from_iterable(westTrianglePoints))),
             ('c3B/static', col)
         )
@@ -294,7 +292,7 @@ def drawMitringTriangles():
         col = list()
         for n in range(len(eastTrianglePoints)):
             col.extend([random.randint(0,255), random.randint(0,255), random.randint(0,255)])
-        east_acute_vertex_list = batch.add(len(eastTrianglePoints), pyglet.gl.GL_TRIANGLE_STRIP, next(renderGroupGenerator),
+        east_acute_vertex_list = batch.add(len(eastTrianglePoints), pyglet.gl.GL_TRIANGLE_STRIP, next(utils.renderGroupGenerator),
             ('v2f/static', list(chain.from_iterable(eastTrianglePoints))),
             ('c3B/static', col)
         )
@@ -465,22 +463,22 @@ def createPoints():
             pass
 
     if drawEastMitreConstructionLines:
-        east_acute_construction_vertex_list = batch.add(len(eastConstructionLines), pyglet.gl.GL_LINES, next(renderGroupGenerator),
+        east_acute_construction_vertex_list = batch.add(len(eastConstructionLines), pyglet.gl.GL_LINES, next(utils.renderGroupGenerator),
             ('v2f/static', list(chain.from_iterable(eastConstructionLines))),
             ('c3B/static', [25, 180, 60]*len(eastConstructionLines))
         )
     if drawEastMitrePointLines:
-        east_acute_vertex_list = batch.add(len(eastPoints), pyglet.gl.GL_LINE_LOOP, next(renderGroupGenerator),
+        east_acute_vertex_list = batch.add(len(eastPoints), pyglet.gl.GL_LINE_LOOP, next(utils.renderGroupGenerator),
             ('v2f/static', list(chain.from_iterable(eastPoints))),
             ('c3B/static', [200, 0, 0]*len(eastPoints))
         )
     if drawWestMitreConstructionLines:
-        west_acute_construction_vertex_list = batch.add(len(westConstructionLines), pyglet.gl.GL_LINES, next(renderGroupGenerator),
+        west_acute_construction_vertex_list = batch.add(len(westConstructionLines), pyglet.gl.GL_LINES, next(utils.renderGroupGenerator),
             ('v2f/static', list(chain.from_iterable(westConstructionLines))),
             ('c3B/static', [25, 180, 60]*len(westConstructionLines))
         )
     if drawWestMitrePointLines:
-        west_acute_vertex_list = batch.add(len(westPoints), pyglet.gl.GL_LINE_LOOP, next(renderGroupGenerator),
+        west_acute_vertex_list = batch.add(len(westPoints), pyglet.gl.GL_LINE_LOOP, next(utils.renderGroupGenerator),
             ('v2f/static', list(chain.from_iterable(westPoints))),
             ('c3B/static', [0, 0, 200]*len(westPoints))
         )
@@ -497,7 +495,7 @@ def createPoints():
         # col = list()
         # for n in range(len(westTrianglePoints)):
         #     col.extend([random.randint(0,255), random.randint(0,255), random.randint(0,255)])
-        # west_acute_vertex_list = batch.add(len(westTrianglePoints), pyglet.gl.GL_TRIANGLE_STRIP, next(renderGroupGenerator),
+        # west_acute_vertex_list = batch.add(len(westTrianglePoints), pyglet.gl.GL_TRIANGLE_STRIP, next(utils.renderGroupGenerator),
         #     ('v2f/static', list(chain.from_iterable(westTrianglePoints))),
         #     ('c3B/static', col)
         # )
@@ -513,7 +511,7 @@ def createPoints():
         for n in range(len(eastTrianglePoints)):
             #col.extend([random.randint(0,255), random.randint(0,255), random.randint(0,255)])
             col.extend([0.9,0,0,0.5])
-        east_acute_vertex_list = batch.add(len(eastTrianglePoints), pyglet.gl.GL_TRIANGLE_STRIP, next(renderGroupGenerator),
+        east_acute_vertex_list = batch.add(len(eastTrianglePoints), pyglet.gl.GL_TRIANGLE_STRIP, next(utils.renderGroupGenerator),
             ('v2f/static', list(chain.from_iterable(eastTrianglePoints))),
             ('c4f/static', col)
         )

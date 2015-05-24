@@ -87,3 +87,6 @@ def generateRenderGroup():
     while True:
         groupCount += 1
         yield pyglet.graphics.OrderedGroup(groupCount)
+
+# Set up the rendergroup generator
+renderGroupGenerator = generateRenderGroup()
