@@ -17,7 +17,7 @@ def perpendicular(vec):
 def mag(vec):
     return math.sqrt(vec[0]**2 + vec[1]**2)
 
-def drawVector(batch, start, vector, col = [255,255,255], norm=False):
+def drawVector(batch, start, vector, col = [255,255,255], norm=True):
     v = 0
     if norm:
         v = normalize(vector)
@@ -25,14 +25,13 @@ def drawVector(batch, start, vector, col = [255,255,255], norm=False):
         v = vector
     drawnLengthMultiplier = 20
     if not norm:
-        drawnLengthMultiplier = 1
-    batch.add(2, pyglet.gl.GL_LINES, None,
-        ('v2f/static', [start[0], start[1], start[0]+v[0]*drawnLengthMultiplier, start[1]+v[1]*drawnLengthMultiplier]),
-        ('c3B/static', col+col)
-    )
+        drawnLengthMultiplier = 5
+    drawLine(batch, start, [start[0]+v[0]*drawnLengthMultiplier, start[1]+v[1]*drawnLengthMultiplier])
 
 def drawLine(batch, start, end, col = [255, 255, 255]):
-    batch.add(2, pyglet.gl.GL_LINES, None,
+    global renderGroupGenerator
+    print("Drawing line: "+str(start)+ " to " + str(end))
+    batch.add(2, pyglet.gl.GL_LINES, next(renderGroupGenerator),
         ('v2f/static', [start[0], start[1], end[0], end[1]]),
         ('c3B/static', col+col)
     )
