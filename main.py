@@ -45,7 +45,7 @@ eastConstructionLines = list()
 westPoints = list()
 westConstructionLines = list()
 
-lineWidth = 40
+lineWidth = 70
 halfLineWidth = lineWidth/2
 
 def createInitialPoints():
