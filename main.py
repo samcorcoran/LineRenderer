@@ -53,7 +53,6 @@ def createInitialPoints():
 
 def drawInitialPoints():
     pointCols = [255, 0, 0] * len(points)
-    global renderGroupGenerator
     points_vertex_list = batch.add(len(points), pyglet.gl.GL_POINTS, next(renderGroupGenerator),
         ('v2f/static', list(chain.from_iterable(points))),
         ('c3B/static', pointCols)
@@ -61,7 +60,6 @@ def drawInitialPoints():
 
 def drawInitialLines():
     lineSegmentCols = [255, 255, 0] * (len(points))
-    global renderGroupGenerator
     line_segments_vertex_list = batch.add(len(points), pyglet.gl.GL_LINE_LOOP, next(renderGroupGenerator),
         ('v2f/static', list(chain.from_iterable(points))),
         ('c3B/static', lineSegmentCols)
@@ -109,7 +107,6 @@ def calculateFixedWidthBorderPoints():
         eastBorderPoints.append( (eX+lineVecs[pIndex][0], eY+lineVecs[pIndex][1]) )
 
 def drawFixedWidthBorder():
-    global renderGroupGenerator
     if drawFixedWidthBorder:
         west_vertex_list = batch.add(len(westBorderPoints), pyglet.gl.GL_POINTS, next(renderGroupGenerator),
             ('v2f/static', list(chain.from_iterable(westBorderPoints))),
@@ -246,7 +243,6 @@ def calculateMitringPoints():
             westConstructionLines.extend([p1, p2])
 
 def drawMitreConstructionLines():
-    global renderGroupGenerator
     if drawEastMitreConstructionLines:
         east_acute_construction_vertex_list = batch.add(len(eastConstructionLines), pyglet.gl.GL_LINES, next(renderGroupGenerator),
             ('v2f/static', list(chain.from_iterable(eastConstructionLines))),
@@ -259,7 +255,6 @@ def drawMitreConstructionLines():
         )
 
 def drawMitreLines():
-    global renderGroupGenerator
     if drawEastMitrePointLines:
         east_acute_vertex_list = batch.add(len(eastPoints), pyglet.gl.GL_LINE_LOOP, next(renderGroupGenerator),
             ('v2f/static', list(chain.from_iterable(eastPoints))),
@@ -273,7 +268,6 @@ def drawMitreLines():
         )
 
 def drawMitringTriangles():
-    global renderGroupGenerator
     if drawMitring:
         # Construct wide-line triangles
         # West triangles
@@ -307,8 +301,6 @@ def drawMitringTriangles():
 
 
 def createPoints():
-    global renderGroupGenerator
-
     ## ROUNDED OBTUSE CORNERS
     # Loop over intersections
     # On inside of turn, find where entering/exiting lines meet, use point
