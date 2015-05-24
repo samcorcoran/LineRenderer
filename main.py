@@ -61,12 +61,11 @@ def drawInitialPoints(points):
     )
 
 def drawInitialLines():
-    if drawOriginalLines:
-        lineSegmentCols = [255, 255, 0] * (len(points))
-        line_segments_vertex_list = batch.add(len(points), pyglet.gl.GL_LINE_LOOP, None,
-            ('v2f/static', list(chain.from_iterable(points))),
-            ('c3B/static', lineSegmentCols)
-        )
+    lineSegmentCols = [255, 255, 0] * (len(points))
+    line_segments_vertex_list = batch.add(len(points), pyglet.gl.GL_LINE_LOOP, None,
+        ('v2f/static', list(chain.from_iterable(points))),
+        ('c3B/static', lineSegmentCols)
+    )
 
 def calculateSegmentNormals():
     # Calculate line segment normals
@@ -595,6 +594,11 @@ if __name__ == '__main__':
 
     if drawOriginalPoints:
         drawInitialPoints()
+
+    # Draws initially input line whose points are held in 'points' list
+    if drawOriginalLines:
+        drawInitialLines()
+
     drawSegmentNormals()
     drawIntersectionNormals()
     drawFixedWidthBorder()
