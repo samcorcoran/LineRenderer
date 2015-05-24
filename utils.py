@@ -8,10 +8,6 @@ def printPoints(listName, pointList):
         print(p)
 
 def normalize(vec):
-    print("NORMALIZING VEC:")
-    print(vec)
-    print(vec[0])
-    print(vec[1])
     magnitude = math.sqrt(vec[0]**2 + vec[1]**2)
     return np.array([vec[0]/magnitude, vec[1]/magnitude])
 
