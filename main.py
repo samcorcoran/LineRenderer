@@ -533,6 +533,7 @@ if __name__ == '__main__':
     fps_display = pyglet.clock.ClockDisplay()
     # Call update 120 per second
     pyglet.clock.schedule_interval(window.update, 1/120.0)
+
     # Generate point data
     createInitialPoints()
     calculateSegmentNormals()
