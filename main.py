@@ -105,23 +105,22 @@ def calculateFixedWidthBorderPoints():
         eastBorderPoints.append( (eX+lineVecs[pIndex][0], eY+lineVecs[pIndex][1]) )
 
 def drawFixedWidthBorder():
-    if drawFixedWidthBorder:
-        west_vertex_list = batch.add(len(westBorderPoints), pyglet.gl.GL_POINTS, next(utils.renderGroupGenerator),
-            ('v2f/static', list(chain.from_iterable(westBorderPoints))),
-            ('c3B/static', [0, 255, 0, 100, 255, 50]*int(len(westBorderPoints)/2))
-        )
-        east_vertex_list = batch.add(len(eastBorderPoints), pyglet.gl.GL_POINTS, next(utils.renderGroupGenerator),
-            ('v2f/static', list(chain.from_iterable(eastBorderPoints))),
-            ('c3B/static', [0, 0, 255, 100, 50, 255]*int(len(eastBorderPoints)/2))
-        )
-        west_line_vertex_list = batch.add(len(westBorderPoints), pyglet.gl.GL_LINE_LOOP, next(utils.renderGroupGenerator),
-            ('v2f/static', list(chain.from_iterable(westBorderPoints))),
-            ('c3B/static', [0, 255, 0, 100, 255, 50]*int(len(westBorderPoints)/2))
-        )
-        east_line_vertex_list = batch.add(len(eastBorderPoints), pyglet.gl.GL_LINE_LOOP, next(utils.renderGroupGenerator),
-            ('v2f/static', list(chain.from_iterable(eastBorderPoints))),
-            ('c3B/static', [0, 0, 255, 100, 50, 255]*int(len(eastBorderPoints)/2))
-        )
+    west_vertex_list = batch.add(len(westBorderPoints), pyglet.gl.GL_POINTS, next(utils.renderGroupGenerator),
+        ('v2f/static', list(chain.from_iterable(westBorderPoints))),
+        ('c3B/static', [0, 255, 0, 100, 255, 50]*int(len(westBorderPoints)/2))
+    )
+    east_vertex_list = batch.add(len(eastBorderPoints), pyglet.gl.GL_POINTS, next(utils.renderGroupGenerator),
+        ('v2f/static', list(chain.from_iterable(eastBorderPoints))),
+        ('c3B/static', [0, 0, 255, 100, 50, 255]*int(len(eastBorderPoints)/2))
+    )
+    west_line_vertex_list = batch.add(len(westBorderPoints), pyglet.gl.GL_LINE_LOOP, next(utils.renderGroupGenerator),
+        ('v2f/static', list(chain.from_iterable(westBorderPoints))),
+        ('c3B/static', [0, 255, 0, 100, 255, 50]*int(len(westBorderPoints)/2))
+    )
+    east_line_vertex_list = batch.add(len(eastBorderPoints), pyglet.gl.GL_LINE_LOOP, next(utils.renderGroupGenerator),
+        ('v2f/static', list(chain.from_iterable(eastBorderPoints))),
+        ('c3B/static', [0, 0, 255, 100, 50, 255]*int(len(eastBorderPoints)/2))
+    )
 
 def drawFixedWidthAtIntersectionBorder():
     if drawFixedWidthAtIntersectionBorder:
@@ -550,7 +549,12 @@ if __name__ == '__main__':
         drawInitialLines()
 
     drawSegmentNormals()
-    drawFixedWidthBorder()
+
+    # Fixed width border draws straight lines on both sides of the original sequence of points
+    #  at a fixed width from it. This acts as a guide to show roughly where the 'thick line' would
+    #  be drawn. These are just aides though.
+    if drawFixedWidthBorder:
+        drawFixedWidthBorder()
 
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
     glEnable(GL_BLEND)
