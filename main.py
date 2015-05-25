@@ -409,7 +409,7 @@ def createPoints():
                     # Append next fan-point location again to create degenerate triangles
                     eastPoints.append((x, y))
 
-            #eastConstructionLines.extend([p1, p2])
+            eastConstructionLines.extend([p1, p2])
         else:
             # Right turn, east border is acute
 
