@@ -399,11 +399,15 @@ def createPoints():
                 #drawLine(fanCentre, (x, y), [0, colourIncrease*(dIndex+1), 0])
 
                 currentDiv += divGap
+                # Append next fan-point location
                 eastPoints.append((x, y))
-                # Append fan centre
                 if dIndex%2 == 0 and dIndex != numBevelDivisions:
+                    # Append fan centre
                     eastPoints.append(points[prev])
-            #eastPoints.append(p4)
+                    pass
+                else:
+                    # Append next fan-point location again to create degenerate triangles
+                    eastPoints.append((x, y))
 
             #eastConstructionLines.extend([p1, p2])
         else:
