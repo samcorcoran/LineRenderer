@@ -508,13 +508,19 @@ def createPoints():
         eastTrianglePoints.append(eastPoints[0])
         eastTrianglePoints.append(eastPoints[1])
 
-        col = list()
+        colLines = list()
+        colTris = list()
         for n in range(len(eastTrianglePoints)):
             #col.extend([random.randint(0,255), random.randint(0,255), random.randint(0,255)])
-            col.extend([0.9,0,0,0.5])
-        east_acute_vertex_list = batch.add(len(eastTrianglePoints), pyglet.gl.GL_TRIANGLE_STRIP, next(utils.renderGroupGenerator),
+            colTris.extend([0.9,0,0,0.5])
+            colLines.extend([0,0.2,0.7,0.8])
+        east_acute_tris_list = batch.add(len(eastTrianglePoints), pyglet.gl.GL_TRIANGLE_STRIP, next(utils.renderGroupGenerator),
             ('v2f/static', list(chain.from_iterable(eastTrianglePoints))),
-            ('c4f/static', col)
+            ('c4f/static', colTris)
+        )
+        east_acute_lines_list = batch.add(len(eastTrianglePoints), pyglet.gl.GL_LINE_LOOP, next(utils.renderGroupGenerator),
+            ('v2f/static', list(chain.from_iterable(eastTrianglePoints))),
+            ('c4f/static', colLines)
         )
         pass
 
