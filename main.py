@@ -501,11 +501,10 @@ def createPoints():
         #     ('v2f/static', list(chain.from_iterable(westTrianglePoints))),
         #     ('c3B/static', col)
         # )
-        #East triangles
-        eastTrianglePoints = list()
-        for pIndex in range(len(eastPoints)):
-            #eastTrianglePoints.append(points[pIndex-1])
-            eastTrianglePoints.append(eastPoints[pIndex])
+
+        #East triangles uses a deep copy of east points
+        eastTrianglePoints = list(eastPoints)
+        # Add start as end to create loop
         eastTrianglePoints.append(eastPoints[0])
         eastTrianglePoints.append(eastPoints[1])
 
