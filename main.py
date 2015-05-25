@@ -327,13 +327,13 @@ def createPoints():
             p1, p2, p3, p4 = utils.calcParallelLinePoints(halfLineWidth, points[prever], points[prev], points[current], eastSide=False)
 
             ## Calculate WEST acute points
-            # line1Norm = (lineNormals[prever][0]*halfLineWidth, lineNormals[prever][1]*halfLineWidth)
+            line1Norm = (lineNormals[prever][0]*halfLineWidth, lineNormals[prever][1]*halfLineWidth)
             # wX1 = points[prever][0] + line1Norm[0]
             # wY1 = points[prever][1] + line1Norm[1]
             # # Vector from current point, into intersection
             # v1 = (points[prev][0]-points[prever][0], points[prev][1]-points[prever][1])
             # # Point on line parallel to line leaving intersection point
-            # line2Norm = (lineNormals[prev][0]*halfLineWidth, lineNormals[prev][1]*halfLineWidth)
+            line2Norm = (lineNormals[prev][0]*halfLineWidth, lineNormals[prev][1]*halfLineWidth)
             # wX2 = points[current][0] + line2Norm[0]
             # wY2 = points[current][1] + line2Norm[1]
             # # Vector from point after intersection, pointing back into it
